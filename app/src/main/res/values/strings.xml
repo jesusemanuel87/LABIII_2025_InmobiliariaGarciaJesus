@@ -17,5 +17,8 @@
     <string name="menu_salir">Salir</string>
     <string name="bt_play">Reproducir</string>
     <string name="tv_play">Reproducir</string>
+    <string name="tvMusica">Mi Música</string>
+    <string name="btPlay">Reproducir</string>
+    <string name="btStop">Detener</string>
 
 </resources>

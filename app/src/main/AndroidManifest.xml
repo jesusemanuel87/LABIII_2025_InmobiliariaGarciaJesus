@@ -16,6 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TP07_LoginMenuGeolocalizacionMusica"
         tools:targetApi="31">
+        
+        <service android:name=".ui.musica.MusicaViewModel"
+            android:enabled="true"
+            android:exported="true"></service>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

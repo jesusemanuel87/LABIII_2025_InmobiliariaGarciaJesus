@@ -32,8 +32,8 @@ import com.google.android.gms.tasks.Task;
 
 public class UbicacionViewModel extends AndroidViewModel {
 
-    private Context context;
-    private FusedLocationProviderClient fused;
+    private final Context context;
+    private final FusedLocationProviderClient fused;
     private MutableLiveData<Location> mLocation;
     private MutableLiveData<MapaActual> mMapa;
 
@@ -54,23 +54,23 @@ public class UbicacionViewModel extends AndroidViewModel {
         }
         return mMapa;
     }
-//    public void obtenerUltimaUbicacion() {
-//        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-//                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            // TODO: Consider calling
-//            //    ActivityCompat#requestPermissions
-//            return;
-//        }
-//        Task<Location> tarea = fused.getLastLocation();
-//        tarea.addOnSuccessListener(getApplication().getMainExecutor(), new OnSuccessListener<Location>() {
-//            @Override
-//            public void onSuccess(Location location) {
-//                if (location != null) {
-//                    mLocation.postValue(location);
-//                }
-//            }
-//        });
-//    }
+    public void obtenerUltimaUbicacion() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            return;
+        }
+        Task<Location> tarea = fused.getLastLocation();
+        tarea.addOnSuccessListener(getApplication().getMainExecutor(), new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    mLocation.postValue(location);
+                }
+            }
+        });
+    }
 
     public void lecturaPermanente() {
         LocationRequest request = LocationRequest.create();
@@ -100,24 +100,32 @@ public class UbicacionViewModel extends AndroidViewModel {
         MapaActual mapaActual=new MapaActual();
         mMapa.setValue(mapaActual);
     }
-    public class MapaActual implements OnMapReadyCallback{
+    public class MapaActual implements OnMapReadyCallback {
         @Override
         public void onMapReady(@NonNull GoogleMap googleMap) {
-            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-
-            Location location= mLocation.getValue();
-            if (location!=null) {
-                LatLng latLng=new LatLng(location.getLatitude(), location.getLongitude());
-                googleMap.addMarker(new MarkerOptions().position(latLng).title("Mi ubicación"));
-                CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(latLng)
-                        .zoom(20)
-                        .bearing(45)
-                        .tilt(70)
-                        .build();
-                CameraUpdate update = CameraUpdateFactory.newCameraPosition(cameraPosition);
-                googleMap.animateCamera(update);
+            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
             }
+            Task<Location> tarea = fused.getLastLocation();
+            tarea.addOnSuccessListener(getApplication().getMainExecutor(), new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                        googleMap.addMarker(new MarkerOptions().position(latLng).title("Mi ubicación"));
+                        CameraPosition cameraPosition = new CameraPosition.Builder()
+                                .target(latLng)
+                                .zoom(20)
+                                .bearing(45)
+                                .tilt(70)
+                                .build();
+                        CameraUpdate update = CameraUpdateFactory.newCameraPosition(cameraPosition);
+                        googleMap.animateCamera(update);
+                    }
+                }
+            });
         }
     }
 }

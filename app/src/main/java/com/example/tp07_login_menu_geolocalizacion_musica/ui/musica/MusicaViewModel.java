@@ -1,19 +1,38 @@
 package com.example.tp07_login_menu_geolocalizacion_musica.ui.musica;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import android.app.Service;
+import android.content.Intent;
+import android.media.MediaPlayer;
+import android.os.IBinder;
 
-public class MusicaViewModel extends ViewModel {
+import androidx.annotation.Nullable;
 
-    private final MutableLiveData<String> mText;
+import com.example.tp07_login_menu_geolocalizacion_musica.R;
+
+
+public class MusicaViewModel extends Service {
+    private MediaPlayer mp;
 
     public MusicaViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is musica fragment");
     }
-
-    public LiveData<String> getText() {
-        return mText;
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mp =MediaPlayer.create(this, R.raw.fortunate_son);
+    }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mp.start();
+        return START_STICKY;
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mp.stop();
+    }
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }
