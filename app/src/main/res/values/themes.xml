@@ -6,4 +6,13 @@
     </style>
 
     <style name="Theme.TP07_LoginMenuGeolocalizacionMusica" parent="Base.Theme.TP07_LoginMenuGeolocalizacionMusica" />
+
+    <style name="Theme.TP07_LoginMenuGeolocalizacionMusica.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.TP07_LoginMenuGeolocalizacionMusica.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.TP07_LoginMenuGeolocalizacionMusica.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

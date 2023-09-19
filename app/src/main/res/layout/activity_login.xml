@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tvBienvenido"
+        android:textColor="#02B1A1"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.118"
+        tools:ignore="TextContrastCheck" />
+
+    <EditText
+        android:id="@+id/edPass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="@string/edPass"
+        android:inputType="textPassword"
+        android:minHeight="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.373"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edUser"
+        app:layout_constraintVertical_bias="0.022"
+        tools:ignore="TextContrastCheck" />
+
+    <EditText
+        android:id="@+id/edUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="@string/edUser"
+        android:inputType="text"
+        android:minHeight="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.373"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.039"
+        tools:ignore="TextContrastCheck" />
+
+    <ImageView
+        android:layout_width="188dp"
+        android:layout_height="156dp"
+        android:layout_marginStart="111dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="112dp"
+        android:layout_marginBottom="10dp"
+        android:src="@drawable/login"
+        app:layout_constraintBottom_toTopOf="@+id/btLogin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edPass"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/btLogin"
+        android:layout_width="185dp"
+        android:layout_height="48dp"
+        android:backgroundTint="#03A9F4"
+        android:text="@string/btLogin"
+        android:textColor="#5E35B1"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edPass"
+        app:layout_constraintVertical_bias="0.447" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
