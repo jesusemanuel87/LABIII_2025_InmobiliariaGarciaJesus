@@ -9,14 +9,14 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.TP07_LoginMenuGeolocalizacionMusica.AppBarOverlay">
+        android:theme="@style/Theme.LABIII_2025_InmobiliariaGarciaJesus.AppBarOverlay">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/Theme.TP07_LoginMenuGeolocalizacionMusica.PopupOverlay" />
+            app:popupTheme="@style/Theme.LABIII_2025_InmobiliariaGarciaJesus.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
