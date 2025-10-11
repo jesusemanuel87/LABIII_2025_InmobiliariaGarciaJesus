@@ -1,10 +1,10 @@
-package com.example.tp07_login_menu_geolocalizacion_musica.ui.salir;
+package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.salir;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 
-import com.example.tp07_login_menu_geolocalizacion_musica.MainActivity;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.MainActivity;
 
 public class SalirDialogo {
 

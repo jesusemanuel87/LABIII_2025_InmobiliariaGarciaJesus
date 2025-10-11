@@ -1,16 +1,14 @@
-package com.example.tp07_login_menu_geolocalizacion_musica.ui.salir;
+package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.salir;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
-import com.example.tp07_login_menu_geolocalizacion_musica.databinding.FragmentSalirBinding;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.databinding.FragmentSalirBinding;
 
 public class SalirFragment extends Fragment {
 

@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TP07_LoginMenuGeolocalizacionMusica"
+        android:theme="@style/Theme.LABIII_2025_InmobiliariaGarciaJesus"
         tools:targetApi="31">
         
         <service android:name=".ui.musica.MusicaViewModel"
@@ -28,7 +28,7 @@
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/title_activity_main"
-            android:theme="@style/Theme.TP07_LoginMenuGeolocalizacionMusica.NoActionBar" />
+            android:theme="@style/Theme.LABIII_2025_InmobiliariaGarciaJesus.NoActionBar" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TP07_Login-Menu-Geolocalizacion-Musica</string>
+    <string name="app_name">LABIII_2025_InmobiliariaGarciaJesus</string>
     <string name="btLogin">Ingresar</string>
     <string name="edUser">Usuario: \"user\"</string>
     <string name="edPass">Clave:\"123\"</string>
@@ -7,7 +7,7 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">TP 07 - Login-Menú-Ubicacion-Musica</string>
+    <string name="nav_header_title">LABIII_2025_InmobiliariaGarciaJesus</string>
     <string name="nav_header_subtitle">user@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>

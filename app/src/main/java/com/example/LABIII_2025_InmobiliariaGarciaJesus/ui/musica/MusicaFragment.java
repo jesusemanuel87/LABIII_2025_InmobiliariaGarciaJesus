@@ -1,4 +1,4 @@
-package com.example.tp07_login_menu_geolocalizacion_musica.ui.musica;
+package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.musica;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.example.tp07_login_menu_geolocalizacion_musica.databinding.FragmentMusicaBinding;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.databinding.FragmentMusicaBinding;
 
 public class MusicaFragment extends Fragment {
 

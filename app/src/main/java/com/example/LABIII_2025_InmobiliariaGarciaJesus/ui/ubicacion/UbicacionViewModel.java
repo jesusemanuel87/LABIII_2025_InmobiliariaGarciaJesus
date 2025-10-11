@@ -1,4 +1,4 @@
-package com.example.tp07_login_menu_geolocalizacion_musica.ui.ubicacion;
+package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.ubicacion;
 
 import android.Manifest;
 import android.app.Application;

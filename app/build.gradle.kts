@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.tp07_login_menu_geolocalizacion_musica"
+    namespace = "com.example.LABIII_2025_InmobiliariaGarciaJesus"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.tp07_login_menu_geolocalizacion_musica"
+        applicationId = "com.example.LABIII_2025_InmobiliariaGarciaJesus"
         minSdk = 30
         targetSdk = 33
         versionCode = 1

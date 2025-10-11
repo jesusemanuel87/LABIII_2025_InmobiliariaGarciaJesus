@@ -1,10 +1,8 @@
-package com.example.tp07_login_menu_geolocalizacion_musica;
+package com.example.LABIII_2025_InmobiliariaGarciaJesus;
 
 import android.os.Bundle;
-import android.view.View;
 import android.view.Menu;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.navigation.NavController;
@@ -14,7 +12,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.tp07_login_menu_geolocalizacion_musica.databinding.ActivityMainBinding;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -1,4 +1,4 @@
-package com.example.tp07_login_menu_geolocalizacion_musica.ui.musica;
+package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.musica;
 
 import android.app.Service;
 import android.content.Intent;
@@ -7,7 +7,7 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import com.example.tp07_login_menu_geolocalizacion_musica.R;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 
 
 public class MusicaViewModel extends Service {

@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TP07_Login-Menu-Geolocalizacion-Musica"
+rootProject.name = "LABIII_2025_InmobiliariaGarciaJesus"
 include(":app")

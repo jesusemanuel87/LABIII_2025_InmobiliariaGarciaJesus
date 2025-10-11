@@ -1,4 +1,4 @@
-package com.example.tp07_login_menu_geolocalizacion_musica.ui.ubicacion;
+package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.ubicacion;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -16,8 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.tp07_login_menu_geolocalizacion_musica.R;
-import com.example.tp07_login_menu_geolocalizacion_musica.databinding.FragmentUbicacionBinding;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.databinding.FragmentUbicacionBinding;
 import com.google.android.gms.maps.SupportMapFragment;
 
 public class UbicacionFragment extends Fragment {

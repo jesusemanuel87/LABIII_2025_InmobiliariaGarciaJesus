@@ -1,4 +1,4 @@
-package com.example.tp07_login_menu_geolocalizacion_musica;
+package com.example.LABIII_2025_InmobiliariaGarciaJesus;
 
 import android.Manifest;
 import android.content.Intent;
@@ -8,12 +8,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.tp07_login_menu_geolocalizacion_musica.databinding.ActivityLoginBinding;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
 

@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/menu_ubicacion"
-        android:name="com.example.tp07_login_menu_geolocalizacion_musica.ui.ubicacion.UbicacionFragment"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.ubicacion.UbicacionFragment"
         android:label="@string/menu_ubicacion"
         tools:layout="@layout/fragment_ubicacion" />
 
     <fragment
         android:id="@+id/menu_musica"
-        android:name="com.example.tp07_login_menu_geolocalizacion_musica.ui.musica.MusicaFragment"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.musica.MusicaFragment"
         android:label="@string/menu_musica"
         tools:layout="@layout/fragment_musica" />
 
     <fragment
         android:id="@+id/menu_salir"
-        android:name="com.example.tp07_login_menu_geolocalizacion_musica.ui.salir.SalirFragment"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.salir.SalirFragment"
         android:label="@string/menu_salir"
         tools:layout="@layout/fragment_salir" />
 </navigation>
