@@ -1,4 +1,4 @@
-package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui;
+package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.perfil;
 
 import androidx.lifecycle.ViewModel;
 

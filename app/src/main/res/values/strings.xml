@@ -12,7 +12,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_ubicacion">Ubicacion</string>
+    <string name="menu_ubicacion">Inicio</string>
     <string name="menu_musica">Musica</string>
     <string name="menu_salir">Salir</string>
     <string name="bt_play">Reproducir</string>
@@ -20,5 +20,9 @@
     <string name="tvMusica">Mi Música</string>
     <string name="btPlay">Reproducir</string>
     <string name="btStop">Detener</string>
+    <string name="menu_perfil">Perfil</string>
+    <string name="menu_inmuebles">Inmuebles</string>
+    <string name="menu_inquilinos">Inquilinos</string>
+    <string name="menu_contratos">Contratos</string>
 
 </resources>

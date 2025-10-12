@@ -101,31 +101,31 @@ public class UbicacionViewModel extends AndroidViewModel {
         mMapa.setValue(mapaActual);
     }
     public class MapaActual implements OnMapReadyCallback {
+        LatLng sanLuis = new LatLng(-33.280576, -66.332482);
+      //  LatLng ulp = new LatLng(-33.150720, -66.306864);
+
         @Override
         public void onMapReady(@NonNull GoogleMap googleMap) {
-            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            Task<Location> tarea = fused.getLastLocation();
-            tarea.addOnSuccessListener(getApplication().getMainExecutor(), new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location != null) {
-                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                        googleMap.addMarker(new MarkerOptions().position(latLng).title("Mi ubicación"));
-                        CameraPosition cameraPosition = new CameraPosition.Builder()
-                                .target(latLng)
-                                .zoom(20)
-                                .bearing(45)
-                                .tilt(70)
-                                .build();
-                        CameraUpdate update = CameraUpdateFactory.newCameraPosition(cameraPosition);
-                        googleMap.animateCamera(update);
-                    }
-                }
-            });
+            MarkerOptions marcadosSanLuis = new MarkerOptions();
+            marcadosSanLuis.position(sanLuis);
+            marcadosSanLuis.title("San Luis");
+
+        //    MarkerOptions marcadosUlp = new MarkerOptions();
+        //    marcadosUlp.position(ulp);
+        //    marcadosUlp.title("Universidad La Punta");
+
+            googleMap.addMarker(marcadosSanLuis);
+        //    googleMap.addMarker(marcadosUlp);
+            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(sanLuis)
+                    .zoom(10)
+                    .bearing(45)
+                    .tilt(15)
+                    .build();
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+            googleMap.animateCamera(cameraUpdate);
         }
     }
 }

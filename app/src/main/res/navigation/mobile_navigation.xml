@@ -3,19 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/menu_ubicacion">
+    app:startDestination="@+id/menu_inicio">
 
     <fragment
-        android:id="@+id/menu_ubicacion"
+        android:id="@+id/menu_inicio"
         android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.ubicacion.UbicacionFragment"
         android:label="@string/menu_ubicacion"
         tools:layout="@layout/fragment_ubicacion" />
 
     <fragment
-        android:id="@+id/menu_musica"
-        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.musica.MusicaFragment"
-        android:label="@string/menu_musica"
-        tools:layout="@layout/fragment_musica" />
+        android:id="@+id/menu_perfil"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.perfil.PerfilFragment"
+        android:label="@string/menu_perfil"
+        tools:layout="@layout/fragment_perfil" />
+    <fragment
+        android:id="@+id/menu_inmuebles"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inmuebles.InmueblesFragment"
+        android:label="@string/menu_inmuebles"
+        tools:layout="@layout/fragment_inmuebles" />
+    <fragment
+        android:id="@+id/menu_inquilinos"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inquilinos.InquilinosFragment"
+        android:label="@string/menu_inquilinos"
+        tools:layout="@layout/fragment_inquilinos" />
+    <fragment
+        android:id="@+id/menu_contratos"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.contratos.ContratosFragment"
+        android:label="@string/menu_contratos"
+        tools:layout="@layout/fragment_contratos" />
+
 
     <fragment
         android:id="@+id/menu_salir"
