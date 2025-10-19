@@ -13,6 +13,7 @@ import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.LoginRequest;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.LoginResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
+import com.google.gson.Gson;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -86,10 +87,12 @@ public class LoginActivityViewModel extends AndroidViewModel{
     // Nuevo método con API REST moderna
     public void loginNuevo(String email, String password){
         mCargando.postValue(true);
+        Log.d("LOGIN", "Intentando login con email: " + email);
         
         LoginRequest loginRequest = new LoginRequest(email, password);
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
         Call<ApiResponse<LoginResponse>> call = api.loginNuevo(loginRequest);
+        Log.d("LOGIN", "URL: " + call.request().url().toString());
         
         call.enqueue(new Callback<ApiResponse<LoginResponse>>() {
             @Override
@@ -118,7 +121,26 @@ public class LoginActivityViewModel extends AndroidViewModel{
                     }
                 } else {
                     Log.d("LOGIN", "Error HTTP: " + response.code());
-                    mutable.postValue("Credenciales incorrectas");
+                    String errorMessage = "Error del servidor (HTTP " + response.code() + ")";
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorBody = response.errorBody().string();
+                            Log.d("LOGIN", "Error body completo: " + errorBody);
+                            // Intentar parsear como ApiResponse
+                            try {
+                                Gson gson = new Gson();
+                                ApiResponse<?> errorResponse = gson.fromJson(errorBody, ApiResponse.class);
+                                if (errorResponse != null && errorResponse.getMessage() != null) {
+                                    errorMessage = errorResponse.getMessage();
+                                }
+                            } catch (Exception parseEx) {
+                                Log.d("LOGIN", "No se pudo parsear error como ApiResponse");
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.d("LOGIN", "Error al leer errorBody: " + e.getMessage());
+                    }
+                    mutable.postValue(errorMessage);
                 }
             }
 

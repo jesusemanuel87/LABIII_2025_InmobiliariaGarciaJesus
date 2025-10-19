@@ -30,7 +30,8 @@ public class LoginActivity extends AppCompatActivity {
         binding.btLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v){
-                mv.Login(
+                // Usar loginNuevo() con API REST que retorna modelo Propietario
+                mv.loginNuevo(
                         binding.edUser.getText().toString(),
                         binding.edPass.getText().toString()
                 );

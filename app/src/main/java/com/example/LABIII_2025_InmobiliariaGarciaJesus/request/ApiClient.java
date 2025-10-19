@@ -30,9 +30,13 @@ import retrofit2.http.Path;
 public class ApiClient {
 
     // URL base configurable - cambiar según el entorno
-    private static final String BASE_URL = "https://inmobiliariaulp-amb5hwfqaraweyga.canadacentral-01.azurewebsites.net/";
-    // Para desarrollo local usar: "http://10.0.2.2:5000/" (emulador) o "http://localhost:5000/" (dispositivo físico)
+    //private static final String BASE_URL = "https://inmobiliariaulp-amb5hwfqaraweyga.canadacentral-01.azurewebsites.net/";
     
+    // Para emulador Android usar: "http://10.0.2.2:5500/"
+    // Para dispositivo físico usar: "http://TU_IP_LOCAL:5500/" (ejemplo: "http://192.168.1.105:5500/")
+    // Reemplaza TU_IP_LOCAL con la IP de tu PC obtenida con 'ipconfig' en CMD
+    private static final String BASE_URL = "http://10.226.44.156:5000/"; // ⚠️ CAMBIAR IP
+
     private static MyApiInterface myApiInterface;
     private static String accessToken = null;
 
