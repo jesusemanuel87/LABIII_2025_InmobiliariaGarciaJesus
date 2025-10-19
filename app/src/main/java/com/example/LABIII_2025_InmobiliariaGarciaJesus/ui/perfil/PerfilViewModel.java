@@ -83,6 +83,11 @@ public class PerfilViewModel extends AndroidViewModel {
     }
 
     public void cargarPerfil() {
+        cargarPerfilLegacy(); // Usar método legacy por ahora
+    }
+    
+    // Método legacy - mantener compatibilidad
+    private void cargarPerfilLegacy() {
         // Obtener el token guardado
         SharedPreferences sp = context.getSharedPreferences("token.xml", Context.MODE_PRIVATE);
         String token = sp.getString("token", "");
@@ -101,7 +106,7 @@ public class PerfilViewModel extends AndroidViewModel {
             public void onResponse(@NonNull Call<Propietarios> call, @NonNull Response<Propietarios> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Propietarios propietario = response.body();
-                    Log.d("PERFIL", "Datos cargados: " + propietario.toString());
+                    Log.d("PERFIL", "Datos cargados (legacy): " + propietario.toString());
                     mPropietario.postValue(propietario);
                 } else {
                     Log.d("PERFIL", "Error en respuesta: " + response.code());
