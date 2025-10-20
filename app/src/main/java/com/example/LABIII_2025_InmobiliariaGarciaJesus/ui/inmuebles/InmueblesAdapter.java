@@ -4,11 +4,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
 
@@ -58,6 +60,7 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        private ImageView ivImagen;
         private TextView tvDireccion;
         private TextView tvTipo;
         private TextView tvPrecio;
@@ -66,6 +69,7 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            ivImagen = itemView.findViewById(R.id.ivImagenInmueble);
             tvDireccion = itemView.findViewById(R.id.tvDireccionInmueble);
             tvTipo = itemView.findViewById(R.id.tvTipoInmueble);
             tvPrecio = itemView.findViewById(R.id.tvPrecioInmueble);
@@ -74,6 +78,17 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
         }
 
         public void bind(Inmueble inmueble, OnInmuebleClickListener listener) {
+            // Cargar imagen con Glide
+            if (inmueble.getImagenPortadaUrl() != null && !inmueble.getImagenPortadaUrl().isEmpty()) {
+                Glide.with(itemView.getContext())
+                        .load(inmueble.getImagenPortadaUrl())
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .error(R.drawable.ic_launcher_background)
+                        .into(ivImagen);
+            } else {
+                ivImagen.setImageResource(R.drawable.ic_launcher_background);
+            }
+            
             tvDireccion.setText(inmueble.getDireccion());
             tvTipo.setText(inmueble.getTipoNombre());
             

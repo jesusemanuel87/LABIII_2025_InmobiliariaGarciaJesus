@@ -11,6 +11,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ActualizarPerfilRequest;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Propietario;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Propietarios;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
 
@@ -20,7 +23,7 @@ import retrofit2.Response;
 
 public class PerfilViewModel extends AndroidViewModel {
     private final Context context;
-    private MutableLiveData<Propietarios> mPropietario;
+    private MutableLiveData<Propietario> mPropietario;
     private MutableLiveData<String> mError;
     private MutableLiveData<Boolean> mModoEdicion;
     private MutableLiveData<String> mTextoBoton;
@@ -33,7 +36,7 @@ public class PerfilViewModel extends AndroidViewModel {
         this.context = application.getApplicationContext();
     }
 
-    public LiveData<Propietarios> getMPropietario() {
+    public LiveData<Propietario> getMPropietario() {
         if (mPropietario == null) {
             mPropietario = new MutableLiveData<>();
         }
@@ -83,39 +86,48 @@ public class PerfilViewModel extends AndroidViewModel {
     }
 
     public void cargarPerfil() {
-        cargarPerfilLegacy(); // Usar método legacy por ahora
+        cargarPerfilNuevo(); // Usar nuevo endpoint REST
     }
     
-    // Método legacy - mantener compatibilidad
-    private void cargarPerfilLegacy() {
-        // Obtener el token guardado
-        SharedPreferences sp = context.getSharedPreferences("token.xml", Context.MODE_PRIVATE);
-        String token = sp.getString("token", "");
+    // Método REST - obtener perfil desde el token
+    private void cargarPerfilNuevo() {
+        String token = ApiClient.getToken(context);
 
-        if (token.isEmpty()) {
+        if (token == null || token.isEmpty()) {
             mError.postValue("No hay sesión activa");
             Log.d("PERFIL", "No hay token guardado");
             return;
         }
 
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
-        Call<Propietarios> call = api.leer(token);
+        Call<ApiResponse<Propietario>> call = api.obtenerPerfil(token);
 
-        call.enqueue(new Callback<Propietarios>() {
+        call.enqueue(new Callback<ApiResponse<Propietario>>() {
             @Override
-            public void onResponse(@NonNull Call<Propietarios> call, @NonNull Response<Propietarios> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Propietario>> call, 
+                                 @NonNull Response<ApiResponse<Propietario>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Propietarios propietario = response.body();
-                    Log.d("PERFIL", "Datos cargados (legacy): " + propietario.toString());
-                    mPropietario.postValue(propietario);
+                    ApiResponse<Propietario> apiResponse = response.body();
+                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
+                        Propietario propietario = apiResponse.getData();
+                        Log.d("PERFIL", "Datos cargados (REST): " + propietario.toString());
+                        mPropietario.postValue(propietario);
+                        // Guardar en SharedPreferences para uso offline
+                        ApiClient.guardarPropietario(context, propietario);
+                    } else {
+                        String errorMsg = apiResponse.getMessage() != null ? 
+                            apiResponse.getMessage() : "Error al cargar el perfil";
+                        Log.d("PERFIL", "Error en respuesta: " + errorMsg);
+                        mError.postValue(errorMsg);
+                    }
                 } else {
-                    Log.d("PERFIL", "Error en respuesta: " + response.code());
+                    Log.d("PERFIL", "Error HTTP: " + response.code());
                     mError.postValue("Error al cargar el perfil: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<Propietarios> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Propietario>> call, @NonNull Throwable t) {
                 Log.d("PERFIL", "Error de conexión: " + t.getMessage());
                 mError.postValue("Error de conexión: " + t.getMessage());
             }
@@ -151,72 +163,59 @@ public class PerfilViewModel extends AndroidViewModel {
             return;
         }
 
-        if (email == null || email.trim().isEmpty()) {
-            mError.postValue("El email es obligatorio");
-            return;
-        }
-
-        // Validar formato de email
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            mError.postValue("El formato del email no es válido");
-            return;
-        }
-
-        SharedPreferences sp = context.getSharedPreferences("token.xml", Context.MODE_PRIVATE);
-        String token = sp.getString("token", "");
-
-        if (token.isEmpty()) {
+        String token = ApiClient.getToken(context);
+        if (token == null || token.isEmpty()) {
             mError.postValue("No hay sesión activa");
             return;
         }
 
-        Propietarios propietarioActual = mPropietario.getValue();
+        Propietario propietarioActual = mPropietario.getValue();
         if (propietarioActual == null) {
             mError.postValue("No hay datos del propietario");
             return;
         }
 
-        // Validar DNI si existe
-        String dni = propietarioActual.getDni();
-        if (dni != null && !dni.trim().isEmpty()) {
-            try {
-                Integer.parseInt(dni.trim());
-            } catch (NumberFormatException e) {
-                mError.postValue("El DNI debe ser un número válido");
-                return;
-            }
-        }
-
-        // Actualizar los datos del propietario
-        propietarioActual.setNombre(nombre.trim());
-        propietarioActual.setApellido(apellido.trim());
-        propietarioActual.setEmail(email.trim());
-        propietarioActual.setTelefono(telefono != null ? telefono.trim() : null);
-        propietarioActual.setClave(null);
+        // Crear el request con los nuevos datos
+        ActualizarPerfilRequest request = new ActualizarPerfilRequest();
+        request.setNombre(nombre.trim());
+        request.setApellido(apellido.trim());
+        request.setTelefono(telefono != null ? telefono.trim() : null);
+        request.setDireccion(propietarioActual.getDireccion());
 
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
-        Call<Propietarios> call = api.actualizar(token, propietarioActual);
+        Call<ApiResponse<Propietario>> call = api.actualizarPerfil(token, request);
 
-        call.enqueue(new Callback<Propietarios>() {
+        call.enqueue(new Callback<ApiResponse<Propietario>>() {
             @Override
-            public void onResponse(@NonNull Call<Propietarios> call, @NonNull Response<Propietarios> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Propietario>> call, 
+                                 @NonNull Response<ApiResponse<Propietario>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Propietarios propietarioActualizado = response.body();
-                    Log.d("PERFIL", "Perfil actualizado correctamente");
-                    mPropietario.postValue(propietarioActualizado);
-                    mModoEdicion.postValue(false);
-                    mTextoBoton.postValue("Editar Perfil");
-                    mIconoBoton.postValue(android.R.drawable.ic_menu_edit);
-                    mFondoCampos.postValue(android.R.color.transparent);
-                    mError.postValue("Perfil actualizado correctamente");
+                    ApiResponse<Propietario> apiResponse = response.body();
+                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
+                        Propietario propietarioActualizado = apiResponse.getData();
+                        Log.d("PERFIL", "Perfil actualizado correctamente (REST)");
+                        mPropietario.postValue(propietarioActualizado);
+                        // Guardar en SharedPreferences
+                        ApiClient.guardarPropietario(context, propietarioActualizado);
+                        mModoEdicion.postValue(false);
+                        mTextoBoton.postValue("Editar Perfil");
+                        mIconoBoton.postValue(android.R.drawable.ic_menu_edit);
+                        mFondoCampos.postValue(android.R.color.transparent);
+                        mError.postValue("Perfil actualizado correctamente");
+                    } else {
+                        String errorMsg = apiResponse.getMessage() != null ? 
+                            apiResponse.getMessage() : "Error al actualizar el perfil";
+                        Log.d("PERFIL", "Error en respuesta: " + errorMsg);
+                        mError.postValue(errorMsg);
+                    }
                 } else {
-                    Log.d("PERFIL", "Error al actualizar: " + response.code());
+                    Log.d("PERFIL", "Error HTTP: " + response.code());
                     mError.postValue("Error al actualizar el perfil: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<Propietarios> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Propietario>> call, @NonNull Throwable t) {
                 Log.d("PERFIL", "Error de conexión: " + t.getMessage());
                 mError.postValue("Error de conexión: " + t.getMessage());
             }

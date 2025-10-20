@@ -14,28 +14,26 @@ import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
 
-import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class InmueblesViewModel extends AndroidViewModel {
+public class DetalleInmuebleViewModel extends AndroidViewModel {
     private final Context context;
-    private MutableLiveData<List<Inmueble>> mInmuebles;
+    private MutableLiveData<Inmueble> mInmueble;
     private MutableLiveData<String> mError;
-    private MutableLiveData<Boolean> mCargando;
+    private MutableLiveData<Boolean> mActualizando;
 
-    public InmueblesViewModel(@NonNull Application application) {
+    public DetalleInmuebleViewModel(@NonNull Application application) {
         super(application);
         this.context = application.getApplicationContext();
     }
 
-    public LiveData<List<Inmueble>> getMInmuebles() {
-        if (mInmuebles == null) {
-            mInmuebles = new MutableLiveData<>();
+    public LiveData<Inmueble> getMInmueble() {
+        if (mInmueble == null) {
+            mInmueble = new MutableLiveData<>();
         }
-        return mInmuebles;
+        return mInmueble;
     }
 
     public LiveData<String> getMError() {
@@ -45,60 +43,55 @@ public class InmueblesViewModel extends AndroidViewModel {
         return mError;
     }
 
-    public LiveData<Boolean> getMCargando() {
-        if (mCargando == null) {
-            mCargando = new MutableLiveData<>(false);
+    public LiveData<Boolean> getMActualizando() {
+        if (mActualizando == null) {
+            mActualizando = new MutableLiveData<>(false);
         }
-        return mCargando;
+        return mActualizando;
     }
 
-    public void cargarInmuebles() {
-        mCargando.postValue(true);
+    public void cargarInmueble(int inmuebleId) {
         String token = ApiClient.getToken(context);
 
         if (token == null || token.isEmpty()) {
             mError.postValue("No hay sesión activa");
-            mCargando.postValue(false);
-            Log.d("INMUEBLES", "No hay token guardado");
+            Log.d("DETALLE_INMUEBLE", "No hay token guardado");
             return;
         }
 
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
-        Call<ApiResponse<List<Inmueble>>> call = api.listarInmuebles(token);
+        Call<ApiResponse<Inmueble>> call = api.obtenerInmueble(token, inmuebleId);
 
-        call.enqueue(new Callback<ApiResponse<List<Inmueble>>>() {
+        call.enqueue(new Callback<ApiResponse<Inmueble>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<Inmueble>>> call,
-                                 @NonNull Response<ApiResponse<List<Inmueble>>> response) {
-                mCargando.postValue(false);
+            public void onResponse(@NonNull Call<ApiResponse<Inmueble>> call,
+                                 @NonNull Response<ApiResponse<Inmueble>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<Inmueble>> apiResponse = response.body();
+                    ApiResponse<Inmueble> apiResponse = response.body();
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Log.d("INMUEBLES", "Inmuebles cargados: " + apiResponse.getData().size());
-                        mInmuebles.postValue(apiResponse.getData());
+                        Log.d("DETALLE_INMUEBLE", "Inmueble cargado: " + apiResponse.getData().getId());
+                        mInmueble.postValue(apiResponse.getData());
                     } else {
                         String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al cargar inmuebles";
-                        Log.d("INMUEBLES", "Error en respuesta: " + errorMsg);
+                            apiResponse.getMessage() : "Error al cargar el inmueble";
+                        Log.d("DETALLE_INMUEBLE", "Error en respuesta: " + errorMsg);
                         mError.postValue(errorMsg);
                     }
                 } else {
-                    Log.d("INMUEBLES", "Error HTTP: " + response.code());
-                    mError.postValue("Error al cargar inmuebles: " + response.code());
+                    Log.d("DETALLE_INMUEBLE", "Error HTTP: " + response.code());
+                    mError.postValue("Error al cargar el inmueble: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<Inmueble>>> call, 
-                                @NonNull Throwable t) {
-                mCargando.postValue(false);
-                Log.d("INMUEBLES", "Error de conexión: " + t.getMessage());
+            public void onFailure(@NonNull Call<ApiResponse<Inmueble>> call, @NonNull Throwable t) {
+                Log.d("DETALLE_INMUEBLE", "Error de conexión: " + t.getMessage());
                 mError.postValue("Error de conexión: " + t.getMessage());
             }
         });
     }
 
-    public void cambiarEstadoInmueble(int inmuebleId, boolean disponible) {
+    public void cambiarDisponibilidad(int inmuebleId, boolean disponible) {
         String token = ApiClient.getToken(context);
         
         if (token == null || token.isEmpty()) {
@@ -106,7 +99,8 @@ public class InmueblesViewModel extends AndroidViewModel {
             return;
         }
 
-        Log.d("INMUEBLES", "Cambiar estado inmueble " + inmuebleId + " a disponible: " + disponible);
+        mActualizando.postValue(true);
+        Log.d("DETALLE_INMUEBLE", "Cambiando disponibilidad a: " + disponible);
         
         ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(disponible);
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
@@ -116,29 +110,36 @@ public class InmueblesViewModel extends AndroidViewModel {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<Inmueble>> call,
                                  @NonNull Response<ApiResponse<Inmueble>> response) {
+                mActualizando.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Inmueble> apiResponse = response.body();
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Log.d("INMUEBLES", "Estado actualizado correctamente");
-                        mError.postValue("Estado del inmueble actualizado");
-                        // Recargar la lista completa
-                        cargarInmuebles();
+                        Log.d("DETALLE_INMUEBLE", "Disponibilidad actualizada correctamente");
+                        mInmueble.postValue(apiResponse.getData());
+                        mError.postValue("Disponibilidad actualizada correctamente");
                     } else {
                         String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al actualizar el estado";
-                        Log.d("INMUEBLES", "Error en respuesta: " + errorMsg);
+                            apiResponse.getMessage() : "Error al actualizar la disponibilidad";
+                        Log.d("DETALLE_INMUEBLE", "Error en respuesta: " + errorMsg);
                         mError.postValue(errorMsg);
+                        // Recargar el inmueble para restaurar el estado anterior
+                        cargarInmueble(inmuebleId);
                     }
                 } else {
-                    Log.d("INMUEBLES", "Error HTTP: " + response.code());
-                    mError.postValue("Error al actualizar el estado: " + response.code());
+                    Log.d("DETALLE_INMUEBLE", "Error HTTP: " + response.code());
+                    mError.postValue("Error al actualizar: " + response.code());
+                    // Recargar el inmueble para restaurar el estado anterior
+                    cargarInmueble(inmuebleId);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Inmueble>> call, @NonNull Throwable t) {
-                Log.d("INMUEBLES", "Error de conexión: " + t.getMessage());
+                mActualizando.postValue(false);
+                Log.d("DETALLE_INMUEBLE", "Error de conexión: " + t.getMessage());
                 mError.postValue("Error de conexión: " + t.getMessage());
+                // Recargar el inmueble para restaurar el estado anterior
+                cargarInmueble(inmuebleId);
             }
         });
     }

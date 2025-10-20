@@ -21,6 +21,17 @@
         android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inmuebles.InmueblesFragment"
         android:label="@string/menu_inmuebles"
         tools:layout="@layout/fragment_inmuebles" />
+    
+    <fragment
+        android:id="@+id/detalleInmuebleFragment"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inmuebles.DetalleInmuebleFragment"
+        android:label="Detalle del Inmueble"
+        tools:layout="@layout/fragment_detalle_inmueble" >
+        <argument
+            android:name="inmuebleId"
+            android:defaultValue="0"
+            app:argType="integer" />
+    </fragment>
     <fragment
         android:id="@+id/menu_inquilinos"
         android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inquilinos.InquilinosFragment"

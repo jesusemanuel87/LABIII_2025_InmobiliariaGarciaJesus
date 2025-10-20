@@ -2,6 +2,7 @@ package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inmuebles;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import android.os.Bundle;
 
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +32,7 @@ public class InmueblesFragment extends Fragment {
     private InmueblesAdapter adapter;
     private ProgressBar progressBar;
     private TextView tvMensaje;
+    private FloatingActionButton fabAgregar;
 
     public static InmueblesFragment newInstance() {
         return new InmueblesFragment();
@@ -46,11 +49,32 @@ public class InmueblesFragment extends Fragment {
         recyclerView = root.findViewById(R.id.recyclerViewInmuebles);
         progressBar = root.findViewById(R.id.progressBarInmuebles);
         tvMensaje = root.findViewById(R.id.tvMensajeInmuebles);
+        fabAgregar = root.findViewById(R.id.fabAgregarInmueble);
         
         // Configurar RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new InmueblesAdapter(new ArrayList<>(), getContext());
         recyclerView.setAdapter(adapter);
+        
+        // Listener para click en item
+        adapter.setOnInmuebleClickListener(new InmueblesAdapter.OnInmuebleClickListener() {
+            @Override
+            public void onInmuebleClick(Inmueble inmueble) {
+                // Navegar al detalle pasando el ID del inmueble
+                Bundle bundle = new Bundle();
+                bundle.putInt("inmuebleId", inmueble.getId());
+                Navigation.findNavController(root).navigate(R.id.detalleInmuebleFragment, bundle);
+            }
+        });
+        
+        // Listener para FAB
+        fabAgregar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: Navegar a fragment para agregar nuevo inmueble
+                Toast.makeText(getContext(), "Función de agregar inmueble próximamente", Toast.LENGTH_SHORT).show();
+            }
+        });
         
         // Observer para lista de inmuebles
         mv.getMInmuebles().observe(getViewLifecycleOwner(), new Observer<List<Inmueble>>() {

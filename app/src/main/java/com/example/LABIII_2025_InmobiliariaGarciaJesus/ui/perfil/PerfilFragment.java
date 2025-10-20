@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.databinding.FragmentPerfilBinding;
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Propietarios;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Propietario;
 
 public class PerfilFragment extends Fragment {
 
@@ -28,9 +28,9 @@ public class PerfilFragment extends Fragment {
         View root = binding.getRoot();
 
         // Observer para los datos del propietario
-        mv.getMPropietario().observe(getViewLifecycleOwner(), new Observer<Propietarios>() {
+        mv.getMPropietario().observe(getViewLifecycleOwner(), new Observer<Propietario>() {
             @Override
-            public void onChanged(Propietarios propietario) {
+            public void onChanged(Propietario propietario) {
                 if (propietario != null) {
                     binding.tvNombreCompleto.setText(propietario.getNombre() + " " + propietario.getApellido());
                     binding.tvEmailHeader.setText(propietario.getEmail());

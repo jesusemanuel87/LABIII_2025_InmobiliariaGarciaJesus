@@ -10,17 +10,30 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvDireccionInmueble"
+        <ImageView
+            android:id="@+id/ivImagenInmueble"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:scaleType="centerCrop"
+            android:background="@android:color/darker_gray"
+            android:contentDescription="Imagen del inmueble" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dirección del inmueble"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black" />
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvDireccionInmueble"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dirección del inmueble"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
 
         <TextView
             android:id="@+id/tvTipoInmueble"
@@ -56,16 +69,17 @@
                 android:textColor="@android:color/darker_gray" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvEstadoInmueble"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Disponible"
-            android:textSize="12sp"
-            android:layout_marginTop="8dp"
-            android:padding="4dp"
-            android:background="@android:color/holo_blue_light"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tvEstadoInmueble"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disponible"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:padding="4dp"
+                android:background="@android:color/holo_blue_light"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>
