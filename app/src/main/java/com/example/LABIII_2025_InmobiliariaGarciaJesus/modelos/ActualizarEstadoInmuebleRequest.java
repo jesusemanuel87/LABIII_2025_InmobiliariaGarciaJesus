@@ -4,28 +4,28 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 public class ActualizarEstadoInmuebleRequest implements Serializable {
-    @SerializedName("disponible")
-    private boolean disponible;
+    @SerializedName("estado")
+    private String estado;
 
     public ActualizarEstadoInmuebleRequest() {
     }
 
-    public ActualizarEstadoInmuebleRequest(boolean disponible) {
-        this.disponible = disponible;
+    public ActualizarEstadoInmuebleRequest(String estado) {
+        this.estado = estado;
     }
 
-    public boolean isDisponible() {
-        return disponible;
+    public String getEstado() {
+        return estado;
     }
 
-    public void setDisponible(boolean disponible) {
-        this.disponible = disponible;
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     @Override
     public String toString() {
         return "ActualizarEstadoInmuebleRequest{" +
-                "disponible=" + disponible +
+                "estado='" + estado + '\'' +
                 '}';
     }
 }

@@ -24,6 +24,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -97,32 +98,44 @@ public class UbicacionViewModel extends AndroidViewModel {
     }
 
     public void obtenerMapa(){
-        MapaActual mapaActual=new MapaActual();
+        // Mapa por defecto (San Luis)
+        MapaActual mapaActual = new MapaActual(-33.280576, -66.332482, "San Luis", 10);
         mMapa.setValue(mapaActual);
     }
+    
+    public void obtenerMapaInmueble(double latitud, double longitud, String titulo){
+        // Mapa de un inmueble específico
+        MapaActual mapaActual = new MapaActual(latitud, longitud, titulo, 17);
+        mMapa.setValue(mapaActual);
+    }
+    
     public class MapaActual implements OnMapReadyCallback {
-        LatLng sanLuis = new LatLng(-33.280576, -66.332482);
-      //  LatLng ulp = new LatLng(-33.150720, -66.306864);
+        private LatLng ubicacion;
+        private String titulo;
+        private float zoom;
+
+        // Constructor con parámetros
+        public MapaActual(double latitud, double longitud, String titulo, float zoom) {
+            this.ubicacion = new LatLng(latitud, longitud);
+            this.titulo = titulo;
+            this.zoom = zoom;
+        }
 
         @Override
         public void onMapReady(@NonNull GoogleMap googleMap) {
-            MarkerOptions marcadosSanLuis = new MarkerOptions();
-            marcadosSanLuis.position(sanLuis);
-            marcadosSanLuis.title("San Luis");
+            MarkerOptions marcador = new MarkerOptions();
+            marcador.position(ubicacion);
+            marcador.title(titulo);
+            marcador.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
-        //    MarkerOptions marcadosUlp = new MarkerOptions();
-        //    marcadosUlp.position(ulp);
-        //    marcadosUlp.title("Universidad La Punta");
-
-            googleMap.addMarker(marcadosSanLuis);
-        //    googleMap.addMarker(marcadosUlp);
-            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            googleMap.addMarker(marcador);
+            googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
             
             CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(sanLuis)
-                    .zoom(10)
+                    .target(ubicacion)
+                    .zoom(zoom)
                     .bearing(45)
-                    .tilt(15)
+                    .tilt(45)
                     .build();
             CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
             googleMap.animateCamera(cameraUpdate);

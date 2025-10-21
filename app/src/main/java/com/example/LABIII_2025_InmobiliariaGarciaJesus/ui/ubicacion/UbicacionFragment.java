@@ -38,9 +38,25 @@ public class UbicacionFragment extends Fragment {
                 smf.getMapAsync(mapaActual);
             }
         });
-        //mv.obtenerUltimaUbicacion();
-        //mv.lecturaPermanente();
-        mv.obtenerMapa();
+        
+        // Verificar si hay argumentos (inmueble específico)
+        if (getArguments() != null) {
+            double latitud = getArguments().getDouble("latitud", 0);
+            double longitud = getArguments().getDouble("longitud", 0);
+            String titulo = getArguments().getString("titulo", "Ubicación del Inmueble");
+            
+            if (latitud != 0 && longitud != 0) {
+                // Mostrar mapa del inmueble específico
+                mv.obtenerMapaInmueble(latitud, longitud, titulo);
+            } else {
+                // Mostrar mapa por defecto
+                mv.obtenerMapa();
+            }
+        } else {
+            // Mostrar mapa por defecto
+            mv.obtenerMapa();
+        }
+        
         return root;
     }
 

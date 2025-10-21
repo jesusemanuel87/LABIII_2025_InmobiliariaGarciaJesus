@@ -1,6 +1,7 @@
 package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inmuebles;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -21,9 +23,14 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
     private List<Inmueble> inmuebles;
     private Context context;
     private OnInmuebleClickListener listener;
+    private OnEstadoChangeListener estadoListener;
 
     public interface OnInmuebleClickListener {
         void onInmuebleClick(Inmueble inmueble);
+    }
+    
+    public interface OnEstadoChangeListener {
+        void onEstadoChange(Inmueble inmueble, boolean nuevoEstado);
     }
 
     public InmueblesAdapter(List<Inmueble> inmuebles, Context context) {
@@ -33,6 +40,10 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
 
     public void setOnInmuebleClickListener(OnInmuebleClickListener listener) {
         this.listener = listener;
+    }
+    
+    public void setOnEstadoChangeListener(OnEstadoChangeListener listener) {
+        this.estadoListener = listener;
     }
 
     public void setInmuebles(List<Inmueble> inmuebles) {
@@ -51,7 +62,7 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Inmueble inmueble = inmuebles.get(position);
-        holder.bind(inmueble, listener);
+        holder.bind(inmueble, listener, estadoListener);
     }
 
     @Override
@@ -65,7 +76,9 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
         private TextView tvTipo;
         private TextView tvPrecio;
         private TextView tvAmbientes;
+        private TextView tvDisponibilidad;
         private TextView tvEstado;
+        private SwitchCompat switchEstado;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,19 +87,40 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
             tvTipo = itemView.findViewById(R.id.tvTipoInmueble);
             tvPrecio = itemView.findViewById(R.id.tvPrecioInmueble);
             tvAmbientes = itemView.findViewById(R.id.tvAmbientesInmueble);
+            tvDisponibilidad = itemView.findViewById(R.id.tvDisponibilidadInmueble);
             tvEstado = itemView.findViewById(R.id.tvEstadoInmueble);
+            switchEstado = itemView.findViewById(R.id.switchEstadoInmueble);
         }
 
-        public void bind(Inmueble inmueble, OnInmuebleClickListener listener) {
+        public void bind(Inmueble inmueble, OnInmuebleClickListener listener, OnEstadoChangeListener estadoListener) {
             // Cargar imagen con Glide
             if (inmueble.getImagenPortadaUrl() != null && !inmueble.getImagenPortadaUrl().isEmpty()) {
+                String imageUrl = inmueble.getImagenPortadaUrl();
+                
+                // Log para debug
+                Log.d("INMUEBLES_ADAPTER", "URL original de imagen: " + imageUrl);
+                
+                // Si la URL no comienza con http, construir URL completa
+                if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+                    // Construir URL completa usando la BASE_URL
+                    String baseUrl = "http://10.226.44.156:5000/";
+                    // Quitar el primer "/" si existe para evitar doble barra
+                    if (imageUrl.startsWith("/")) {
+                        imageUrl = baseUrl + imageUrl.substring(1);
+                    } else {
+                        imageUrl = baseUrl + imageUrl;
+                    }
+                    Log.d("INMUEBLES_ADAPTER", "URL completa construida: " + imageUrl);
+                }
+                
                 Glide.with(itemView.getContext())
-                        .load(inmueble.getImagenPortadaUrl())
-                        .placeholder(R.drawable.ic_launcher_background)
-                        .error(R.drawable.ic_launcher_background)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_home)
+                        .error(R.drawable.ic_home)
                         .into(ivImagen);
             } else {
-                ivImagen.setImageResource(R.drawable.ic_launcher_background);
+                Log.d("INMUEBLES_ADAPTER", "No hay URL de imagen para inmueble ID: " + inmueble.getId());
+                ivImagen.setImageResource(R.drawable.ic_home);
             }
             
             tvDireccion.setText(inmueble.getDireccion());
@@ -100,8 +134,49 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
             
             tvAmbientes.setText(inmueble.getAmbientes() + " ambientes");
             
-            String estado = inmueble.isDisponible() ? "Disponible" : "No disponible";
+            // Mostrar disponibilidad (Disponible, No Disponible, Reservado)
+            String disponibilidad = inmueble.getDisponibilidad() != null ? inmueble.getDisponibilidad() : "Sin información";
+            tvDisponibilidad.setText(disponibilidad);
+            
+            // Cambiar color según disponibilidad
+            if ("Disponible".equals(disponibilidad)) {
+                tvDisponibilidad.setBackgroundColor(0xFF4CAF50); // Verde
+            } else if ("No Disponible".equals(disponibilidad)) {
+                tvDisponibilidad.setBackgroundColor(0xFFF44336); // Rojo
+            } else if ("Reservado".equals(disponibilidad)) {
+                tvDisponibilidad.setBackgroundColor(0xFFFF9800); // Naranja
+            } else {
+                tvDisponibilidad.setBackgroundColor(0xFF9E9E9E); // Gris
+            }
+            
+            // Mostrar estado (Activo/Inactivo)
+            String estado = inmueble.getEstado() != null ? inmueble.getEstado() : "Sin estado";
             tvEstado.setText(estado);
+            
+            // Cambiar color del texto según estado
+            if ("Activo".equals(estado)) {
+                tvEstado.setTextColor(0xFF4CAF50); // Verde
+            } else {
+                tvEstado.setTextColor(0xFFF44336); // Rojo
+            }
+            
+            // Configurar switch según el estado actual
+            boolean esActivo = "Activo".equals(estado);
+            switchEstado.setChecked(esActivo);
+            
+            // Habilitar switch solo si la disponibilidad es "Disponible"
+            boolean puedeModificar = "Disponible".equals(disponibilidad);
+            switchEstado.setEnabled(puedeModificar);
+            
+            // Remover listeners previos para evitar duplicados
+            switchEstado.setOnCheckedChangeListener(null);
+            
+            // Listener para cambio de estado
+            switchEstado.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (estadoListener != null && buttonView.isPressed()) {
+                    estadoListener.onEstadoChange(inmueble, isChecked);
+                }
+            });
             
             itemView.setOnClickListener(v -> {
                 if (listener != null) {

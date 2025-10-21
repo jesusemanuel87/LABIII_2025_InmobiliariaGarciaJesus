@@ -91,7 +91,7 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         });
     }
 
-    public void cambiarDisponibilidad(int inmuebleId, boolean disponible) {
+    public void cambiarEstadoInmueble(int inmuebleId, String estado) {
         String token = ApiClient.getToken(context);
         
         if (token == null || token.isEmpty()) {
@@ -100,9 +100,13 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         }
 
         mActualizando.postValue(true);
-        Log.d("DETALLE_INMUEBLE", "Cambiando disponibilidad a: " + disponible);
+        Log.d("DETALLE_INMUEBLE", "=== CAMBIO DE ESTADO ===");
+        Log.d("DETALLE_INMUEBLE", "Inmueble ID: " + inmuebleId);
+        Log.d("DETALLE_INMUEBLE", "Nuevo estado a enviar: " + estado);
         
-        ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(disponible);
+        ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(estado);
+        Log.d("DETALLE_INMUEBLE", "Request JSON: {\"estado\":\"" + estado + "\"}");
+        
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
         Call<ApiResponse<Inmueble>> call = api.actualizarEstadoInmueble(token, inmuebleId, request);
 
@@ -111,15 +115,23 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
             public void onResponse(@NonNull Call<ApiResponse<Inmueble>> call,
                                  @NonNull Response<ApiResponse<Inmueble>> response) {
                 mActualizando.postValue(false);
+                Log.d("DETALLE_INMUEBLE", "Respuesta HTTP Code: " + response.code());
+                
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Inmueble> apiResponse = response.body();
+                    Log.d("DETALLE_INMUEBLE", "Response success: " + apiResponse.isSuccess());
+                    Log.d("DETALLE_INMUEBLE", "Response message: " + apiResponse.getMessage());
+                    
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Log.d("DETALLE_INMUEBLE", "Disponibilidad actualizada correctamente");
-                        mInmueble.postValue(apiResponse.getData());
-                        mError.postValue("Disponibilidad actualizada correctamente");
+                        Inmueble inmuebleActualizado = apiResponse.getData();
+                        Log.d("DETALLE_INMUEBLE", "Estado devuelto por servidor: " + inmuebleActualizado.getEstado());
+                        Log.d("DETALLE_INMUEBLE", "Disponibilidad devuelta: " + inmuebleActualizado.getDisponibilidad());
+                        
+                        mInmueble.postValue(inmuebleActualizado);
+                        mError.postValue("Estado del inmueble actualizado a " + estado);
                     } else {
                         String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al actualizar la disponibilidad";
+                            apiResponse.getMessage() : "Error al actualizar el estado";
                         Log.d("DETALLE_INMUEBLE", "Error en respuesta: " + errorMsg);
                         mError.postValue(errorMsg);
                         // Recargar el inmueble para restaurar el estado anterior

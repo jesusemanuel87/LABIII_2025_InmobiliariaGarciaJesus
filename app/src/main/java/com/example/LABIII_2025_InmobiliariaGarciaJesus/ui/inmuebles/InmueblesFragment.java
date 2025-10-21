@@ -67,6 +67,15 @@ public class InmueblesFragment extends Fragment {
             }
         });
         
+        // Listener para cambio de estado
+        adapter.setOnEstadoChangeListener(new InmueblesAdapter.OnEstadoChangeListener() {
+            @Override
+            public void onEstadoChange(Inmueble inmueble, boolean nuevoEstado) {
+                String estadoTexto = nuevoEstado ? "Activo" : "Inactivo";
+                mv.cambiarEstadoInmueble(inmueble.getId(), estadoTexto);
+            }
+        });
+        
         // Listener para FAB
         fabAgregar.setOnClickListener(new View.OnClickListener() {
             @Override

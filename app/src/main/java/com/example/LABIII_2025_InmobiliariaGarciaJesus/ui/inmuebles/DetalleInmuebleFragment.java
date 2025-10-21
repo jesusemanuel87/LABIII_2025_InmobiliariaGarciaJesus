@@ -1,9 +1,11 @@
 package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inmuebles;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -15,19 +17,33 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
+import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.InmuebleImagen;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DetalleInmuebleFragment extends Fragment {
 
     private DetalleInmuebleViewModel mv;
-    private ImageView ivImagen;
-    private TextView tvDireccion, tvLocalidad, tvTipo, tvAmbientes, tvSuperficie, tvUso, tvPrecio, tvEstado;
+    private ViewPager2 viewPagerImagenes;
+    private LinearLayout layoutIndicadores;
+    private TextView tvDireccion, tvLocalidad, tvTipo, tvAmbientes, tvSuperficie, tvUso, tvPrecio, tvEstado, tvDisponibilidad;
     private SwitchCompat switchDisponible;
+    private Button btnVerEnMapa;
     private ProgressBar progressBar;
     private int inmuebleId;
+    private Inmueble inmuebleActual;
+    private ImagenesCarruselAdapter imagenesAdapter;
+    private ImageView[] indicadores;
 
     public static DetalleInmuebleFragment newInstance(int inmuebleId) {
         DetalleInmuebleFragment fragment = new DetalleInmuebleFragment();
@@ -53,7 +69,8 @@ public class DetalleInmuebleFragment extends Fragment {
         mv = new ViewModelProvider(this).get(DetalleInmuebleViewModel.class);
         
         // Inicializar vistas
-        ivImagen = root.findViewById(R.id.ivImagenDetalle);
+        viewPagerImagenes = root.findViewById(R.id.viewPagerImagenes);
+        layoutIndicadores = root.findViewById(R.id.layoutIndicadores);
         tvDireccion = root.findViewById(R.id.tvDireccionDetalle);
         tvLocalidad = root.findViewById(R.id.tvLocalidadDetalle);
         tvTipo = root.findViewById(R.id.tvTipoDetalle);
@@ -61,8 +78,10 @@ public class DetalleInmuebleFragment extends Fragment {
         tvSuperficie = root.findViewById(R.id.tvSuperficieDetalle);
         tvUso = root.findViewById(R.id.tvUsoDetalle);
         tvPrecio = root.findViewById(R.id.tvPrecioDetalle);
+        tvDisponibilidad = root.findViewById(R.id.tvDisponibilidadDetalle);
         tvEstado = root.findViewById(R.id.tvEstadoDetalle);
         switchDisponible = root.findViewById(R.id.switchDisponible);
+        btnVerEnMapa = root.findViewById(R.id.btnVerEnMapa);
         progressBar = root.findViewById(R.id.progressBarDetalle);
         
         // Observer para el inmueble
@@ -70,7 +89,27 @@ public class DetalleInmuebleFragment extends Fragment {
             @Override
             public void onChanged(Inmueble inmueble) {
                 if (inmueble != null) {
+                    inmuebleActual = inmueble;
                     mostrarDatosInmueble(inmueble);
+                }
+            }
+        });
+        
+        // Listener del botón Ver en Mapa
+        btnVerEnMapa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (inmuebleActual != null && inmuebleActual.getLatitud() != null && inmuebleActual.getLongitud() != null) {
+                    // Crear bundle con los datos del inmueble
+                    Bundle bundle = new Bundle();
+                    bundle.putDouble("latitud", inmuebleActual.getLatitud());
+                    bundle.putDouble("longitud", inmuebleActual.getLongitud());
+                    bundle.putString("titulo", inmuebleActual.getDireccion());
+                    
+                    // Navegar al fragment de ubicación
+                    Navigation.findNavController(v).navigate(R.id.menu_inicio, bundle);
+                } else {
+                    Toast.makeText(getContext(), "No hay coordenadas disponibles para este inmueble", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -104,7 +143,8 @@ public class DetalleInmuebleFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (buttonView.isPressed()) { // Solo cuando el usuario lo cambia manualmente
-                    mv.cambiarDisponibilidad(inmuebleId, isChecked);
+                    String estadoTexto = isChecked ? "Activo" : "Inactivo";
+                    mv.cambiarEstadoInmueble(inmuebleId, estadoTexto);
                 }
             }
         });
@@ -116,15 +156,34 @@ public class DetalleInmuebleFragment extends Fragment {
     }
 
     private void mostrarDatosInmueble(Inmueble inmueble) {
-        // Cargar imagen
-        if (inmueble.getImagenPortadaUrl() != null && !inmueble.getImagenPortadaUrl().isEmpty()) {
-            Glide.with(this)
-                    .load(inmueble.getImagenPortadaUrl())
-                    .placeholder(R.drawable.ic_launcher_background)
-                    .error(R.drawable.ic_launcher_background)
-                    .into(ivImagen);
+        // Cargar carrusel de imágenes
+        List<InmuebleImagen> imagenes = inmueble.getImagenes();
+        
+        if (imagenes != null && !imagenes.isEmpty()) {
+            Log.d("DETALLE_INMUEBLE", "Cargando " + imagenes.size() + " imágenes en el carrusel");
+            
+            // Configurar adapter del ViewPager2
+            imagenesAdapter = new ImagenesCarruselAdapter(getContext(), imagenes);
+            viewPagerImagenes.setAdapter(imagenesAdapter);
+            
+            // Configurar indicadores
+            configurarIndicadores(imagenes.size());
+            
+            // Listener para cambiar el indicador activo
+            viewPagerImagenes.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int position) {
+                    super.onPageSelected(position);
+                    actualizarIndicadores(position);
+                }
+            });
+            
+            // Mostrar el primer indicador como activo
+            actualizarIndicadores(0);
         } else {
-            ivImagen.setImageResource(R.drawable.ic_launcher_background);
+            Log.d("DETALLE_INMUEBLE", "No hay imágenes para mostrar");
+            // Si no hay imágenes, ocultar indicadores
+            layoutIndicadores.setVisibility(View.GONE);
         }
         
         // Datos básicos
@@ -145,18 +204,74 @@ public class DetalleInmuebleFragment extends Fragment {
             tvPrecio.setText(String.format("$ %.2f", inmueble.getPrecio()));
         }
         
+        // Mostrar disponibilidad con colores
+        String disponibilidad = inmueble.getDisponibilidad() != null ? inmueble.getDisponibilidad() : "Sin información";
+        tvDisponibilidad.setText(disponibilidad);
+        
+        // Cambiar color según disponibilidad
+        if ("Disponible".equals(disponibilidad)) {
+            tvDisponibilidad.setBackgroundColor(0xFF4CAF50); // Verde
+        } else if ("No Disponible".equals(disponibilidad)) {
+            tvDisponibilidad.setBackgroundColor(0xFFF44336); // Rojo
+        } else if ("Reservado".equals(disponibilidad)) {
+            tvDisponibilidad.setBackgroundColor(0xFFFF9800); // Naranja
+        } else {
+            tvDisponibilidad.setBackgroundColor(0xFF9E9E9E); // Gris
+        }
+        
         tvEstado.setText("Estado: " + inmueble.getEstado());
         
-        // Switch sin trigger del listener
+        // Configurar switch según el estado y disponibilidad
         switchDisponible.setOnCheckedChangeListener(null);
-        switchDisponible.setChecked(inmueble.isDisponible());
+        
+        // El switch muestra el estado (Activo/Inactivo)
+        boolean esActivo = "Activo".equals(inmueble.getEstado());
+        switchDisponible.setChecked(esActivo);
+        
+        // Habilitar switch solo si la disponibilidad es "Disponible"
+        boolean puedeModificar = "Disponible".equals(disponibilidad);
+        switchDisponible.setEnabled(puedeModificar);
+        
         switchDisponible.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (buttonView.isPressed()) {
-                    mv.cambiarDisponibilidad(inmuebleId, isChecked);
+                    String estadoTexto = isChecked ? "Activo" : "Inactivo";
+                    mv.cambiarEstadoInmueble(inmuebleId, estadoTexto);
                 }
             }
         });
+    }
+    
+    private void configurarIndicadores(int cantidad) {
+        layoutIndicadores.removeAllViews();
+        indicadores = new ImageView[cantidad];
+        
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        layoutParams.setMargins(8, 0, 8, 0);
+        
+        for (int i = 0; i < cantidad; i++) {
+            indicadores[i] = new ImageView(getContext());
+            indicadores[i].setImageDrawable(getResources().getDrawable(R.drawable.indicador_inactivo));
+            indicadores[i].setLayoutParams(layoutParams);
+            layoutIndicadores.addView(indicadores[i]);
+        }
+        
+        layoutIndicadores.setVisibility(View.VISIBLE);
+    }
+    
+    private void actualizarIndicadores(int posicionActual) {
+        if (indicadores == null) return;
+        
+        for (int i = 0; i < indicadores.length; i++) {
+            if (i == posicionActual) {
+                indicadores[i].setImageDrawable(getResources().getDrawable(R.drawable.indicador_activo));
+            } else {
+                indicadores[i].setImageDrawable(getResources().getDrawable(R.drawable.indicador_inactivo));
+            }
+        }
     }
 }

@@ -70,7 +70,7 @@
         </LinearLayout>
 
             <TextView
-                android:id="@+id/tvEstadoInmueble"
+                android:id="@+id/tvDisponibilidadInmueble"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Disponible"
@@ -80,6 +80,37 @@
                 android:background="@android:color/holo_blue_light"
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Estado:"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/tvEstadoInmueble"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Activo"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_green_dark"
+                    android:layout_marginEnd="8dp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchEstadoInmueble"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -74,8 +74,16 @@ public class InmueblesViewModel extends AndroidViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<List<Inmueble>> apiResponse = response.body();
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Log.d("INMUEBLES", "Inmuebles cargados: " + apiResponse.getData().size());
-                        mInmuebles.postValue(apiResponse.getData());
+                        List<Inmueble> inmuebles = apiResponse.getData();
+                        Log.d("INMUEBLES", "Inmuebles cargados: " + inmuebles.size());
+                        
+                        // Log de las URLs de imágenes para debug
+                        for (Inmueble inmueble : inmuebles) {
+                            Log.d("INMUEBLES", "Inmueble ID " + inmueble.getId() + 
+                                  " - imagenPortadaUrl: " + inmueble.getImagenPortadaUrl());
+                        }
+                        
+                        mInmuebles.postValue(inmuebles);
                     } else {
                         String errorMsg = apiResponse.getMessage() != null ? 
                             apiResponse.getMessage() : "Error al cargar inmuebles";
@@ -98,7 +106,7 @@ public class InmueblesViewModel extends AndroidViewModel {
         });
     }
 
-    public void cambiarEstadoInmueble(int inmuebleId, boolean disponible) {
+    public void cambiarEstadoInmueble(int inmuebleId, String estado) {
         String token = ApiClient.getToken(context);
         
         if (token == null || token.isEmpty()) {
@@ -106,9 +114,9 @@ public class InmueblesViewModel extends AndroidViewModel {
             return;
         }
 
-        Log.d("INMUEBLES", "Cambiar estado inmueble " + inmuebleId + " a disponible: " + disponible);
+        Log.d("INMUEBLES", "Cambiar estado inmueble " + inmuebleId + " a: " + estado);
         
-        ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(disponible);
+        ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(estado);
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
         Call<ApiResponse<Inmueble>> call = api.actualizarEstadoInmueble(token, inmuebleId, request);
 
@@ -120,7 +128,7 @@ public class InmueblesViewModel extends AndroidViewModel {
                     ApiResponse<Inmueble> apiResponse = response.body();
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
                         Log.d("INMUEBLES", "Estado actualizado correctamente");
-                        mError.postValue("Estado del inmueble actualizado");
+                        mError.postValue("Estado del inmueble actualizado a " + estado);
                         // Recargar la lista completa
                         cargarInmuebles();
                     } else {

@@ -38,6 +38,9 @@ public class Inmueble implements Serializable {
     @SerializedName("disponible")
     private boolean disponible;
     
+    @SerializedName("disponibilidad")
+    private String disponibilidad;
+    
     @SerializedName("precio")
     private Double precio;
     
@@ -145,6 +148,14 @@ public class Inmueble implements Serializable {
 
     public void setDisponible(boolean disponible) {
         this.disponible = disponible;
+    }
+    
+    public String getDisponibilidad() {
+        return disponibilidad;
+    }
+    
+    public void setDisponibilidad(String disponibilidad) {
+        this.disponibilidad = disponibilidad;
     }
 
     public Double getPrecio() {
