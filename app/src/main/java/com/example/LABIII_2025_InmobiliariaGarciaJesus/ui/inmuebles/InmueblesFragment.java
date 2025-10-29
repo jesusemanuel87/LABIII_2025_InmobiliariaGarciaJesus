@@ -80,8 +80,8 @@ public class InmueblesFragment extends Fragment {
         fabAgregar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Navegar a fragment para agregar nuevo inmueble
-                Toast.makeText(getContext(), "Función de agregar inmueble próximamente", Toast.LENGTH_SHORT).show();
+                // Navegar al fragment de cargar inmueble
+                Navigation.findNavController(root).navigate(R.id.cargarInmuebleFragment);
             }
         });
         
@@ -129,5 +129,12 @@ public class InmueblesFragment extends Fragment {
         mv.cargarInmuebles();
         
         return root;
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Recargar inmuebles al volver de otros fragments
+        mv.cargarInmuebles();
     }
 }

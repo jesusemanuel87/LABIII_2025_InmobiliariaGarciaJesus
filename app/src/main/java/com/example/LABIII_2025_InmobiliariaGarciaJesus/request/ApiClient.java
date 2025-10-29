@@ -2,6 +2,11 @@ package com.example.LABIII_2025_InmobiliariaGarciaJesus.request;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.*;
@@ -29,17 +34,79 @@ import retrofit2.http.Path;
 
 public class ApiClient {
 
-    // URL base configurable - cambiar según el entorno
-    //private static final String BASE_URL = "https://inmobiliariaulp-amb5hwfqaraweyga.canadacentral-01.azurewebsites.net/";
-    
-    // Para emulador Android usar: "http://10.0.2.2:5500/"
-    // Para dispositivo físico usar: "http://TU_IP_LOCAL:5500/" (ejemplo: "http://192.168.1.105:5500/")
-    // Reemplaza TU_IP_LOCAL con la IP de tu PC obtenida con 'ipconfig' en CMD
-    private static final String BASE_URL = "http://10.226.44.156:5000/"; // ⚠️ CAMBIAR IP
+    // Configuración de IPs por red WiFi
+    private static final String IP_POCO = "http://192.168.248.156:5000/";
+    private static final String IP_TENDA = "http://10.226.44.156:5000/";
+    private static final String IP_EMULADOR = "http://10.0.2.2:5000/";
+    private static final String IP_DEFAULT = IP_POCO; // IP por defecto
 
     private static MyApiInterface myApiInterface;
     private static String accessToken = null;
 
+    /**
+     * Detecta la red WiFi actual y retorna la URL base correspondiente
+     */
+    private static String getBaseUrlByNetwork(Context context) {
+        try {
+            WifiManager wifiManager = (WifiManager) context.getApplicationContext()
+                    .getSystemService(Context.WIFI_SERVICE);
+            
+            if (wifiManager != null && wifiManager.isWifiEnabled()) {
+                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                if (wifiInfo != null) {
+                    String ssid = wifiInfo.getSSID();
+                    // Remover comillas del SSID
+                    if (ssid != null) {
+                        ssid = ssid.replace("\"", "");
+                        Log.d("API_CLIENT", "Red WiFi detectada: " + ssid);
+                        
+                        // Seleccionar IP según el SSID
+                        if (ssid.equals("POCO")) {
+                            Log.d("API_CLIENT", "Usando IP de red POCO: " + IP_POCO);
+                            return IP_POCO;
+                        } else if (ssid.equals("Tenda_58EBC0")) {
+                            Log.d("API_CLIENT", "Usando IP de red Tenda: " + IP_TENDA);
+                            return IP_TENDA;
+                        }
+                    }
+                }
+            }
+            
+            // Si no se detecta WiFi o no coincide con redes conocidas
+            Log.d("API_CLIENT", "Red no reconocida o sin WiFi, usando IP por defecto: " + IP_DEFAULT);
+            return IP_DEFAULT;
+            
+        } catch (Exception e) {
+            Log.e("API_CLIENT", "Error detectando red WiFi: " + e.getMessage());
+            return IP_DEFAULT;
+        }
+    }
+
+    /**
+     * Obtiene la interfaz API con detección automática de red WiFi
+     * @param context Context de la aplicación
+     */
+    public static MyApiInterface getMyApiInterface(Context context){
+        String baseUrl = getBaseUrlByNetwork(context);
+        
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+        Log.d("API_CLIENT", "Base URL configurada: " + retrofit.baseUrl().toString());
+        myApiInterface = retrofit.create(MyApiInterface.class);
+        return myApiInterface;
+    }
+
+    /**
+     * Versión legacy para compatibilidad (sin context)
+     * Usa IP por defecto
+     */
     public static MyApiInterface getMyApiInterface(){
         Gson gson = new GsonBuilder()
                 .setLenient()
@@ -47,10 +114,10 @@ public class ApiClient {
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(IP_DEFAULT)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
-        Log.d("API_CLIENT", "Base URL: " + retrofit.baseUrl().toString());
+        Log.d("API_CLIENT", "Base URL (default): " + retrofit.baseUrl().toString());
         myApiInterface = retrofit.create(MyApiInterface.class);
         return myApiInterface;
     }
@@ -104,6 +171,22 @@ public class ApiClient {
 
     public static boolean isLoggedIn(Context context){
         return getToken(context) != null;
+    }
+
+    /**
+     * Obtiene la URL base detectando automáticamente la red WiFi
+     * @param context Context de la aplicación
+     */
+    public static String getBaseUrl(Context context){
+        return getBaseUrlByNetwork(context);
+    }
+
+    /**
+     * Versión legacy para compatibilidad (sin context)
+     * Usa IP por defecto
+     */
+    public static String getBaseUrl(){
+        return IP_DEFAULT;
     }
 
     public interface MyApiInterface{
@@ -181,5 +264,17 @@ public class ApiClient {
         @GET("api/ContratosApi/inmueble/{inmuebleId}")
         Call<ApiResponse<List<Contrato>>> listarContratosPorInmueble(@Header("Authorization") String token, 
                                                                      @Path("inmuebleId") int inmuebleId);
+        
+        // === GEOREF API (Provincias y Localidades) ===
+        @GET("api/GeorefApi/provincias")
+        Call<ApiResponse<List<Provincia>>> listarProvincias(@Header("Authorization") String token);
+        
+        @GET("api/GeorefApi/localidades/{provincia}")
+        Call<ApiResponse<List<Localidad>>> listarLocalidadesPorProvincia(@Header("Authorization") String token,
+                                                                         @Path("provincia") String provincia);
+        
+        // === TIPOS DE INMUEBLE API ===
+        @GET("api/TiposInmuebleApi")
+        Call<ApiResponse<List<TipoInmueble>>> listarTiposInmueble(@Header("Authorization") String token);
     }
 }

@@ -63,7 +63,7 @@ public class InmueblesViewModel extends AndroidViewModel {
             return;
         }
 
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<ApiResponse<List<Inmueble>>> call = api.listarInmuebles(token);
 
         call.enqueue(new Callback<ApiResponse<List<Inmueble>>>() {
@@ -117,7 +117,7 @@ public class InmueblesViewModel extends AndroidViewModel {
         Log.d("INMUEBLES", "Cambiar estado inmueble " + inmuebleId + " a: " + estado);
         
         ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(estado);
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<ApiResponse<Inmueble>> call = api.actualizarEstadoInmueble(token, inmuebleId, request);
 
         call.enqueue(new Callback<ApiResponse<Inmueble>>() {

@@ -97,15 +97,30 @@ public class UbicacionViewModel extends AndroidViewModel {
         fused.requestLocationUpdates(request, callback, null);
     }
 
+    /**
+     * Procesa los argumentos recibidos del Fragment y decide qué mapa mostrar
+     * Esta lógica antes estaba en el Fragment (antipatrón)
+     */
+    public void procesarArgumentos(double latitud, double longitud, String titulo) {
+        // Validar si las coordenadas son válidas (diferentes de 0)
+        if (latitud != 0 && longitud != 0) {
+            // Mostrar mapa del inmueble específico
+            obtenerMapaInmueble(latitud, longitud, titulo);
+        } else {
+            // Mostrar mapa por defecto de San Luis
+            obtenerMapa();
+        }
+    }
+    
     public void obtenerMapa(){
         // Mapa por defecto (San Luis)
-        MapaActual mapaActual = new MapaActual(-33.280576, -66.332482, "San Luis", 10);
+        MapaActual mapaActual = new MapaActual(-33.280576, -66.332482, "San Luis", 20);
         mMapa.setValue(mapaActual);
     }
     
     public void obtenerMapaInmueble(double latitud, double longitud, String titulo){
         // Mapa de un inmueble específico
-        MapaActual mapaActual = new MapaActual(latitud, longitud, titulo, 17);
+        MapaActual mapaActual = new MapaActual(latitud, longitud, titulo, 20);
         mMapa.setValue(mapaActual);
     }
     
@@ -129,7 +144,7 @@ public class UbicacionViewModel extends AndroidViewModel {
             marcador.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
             googleMap.addMarker(marcador);
-            googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
             
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(ubicacion)

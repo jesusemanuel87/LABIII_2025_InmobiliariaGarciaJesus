@@ -67,7 +67,7 @@ public class InquilinosViewModel extends AndroidViewModel {
         }
 
         // Obtener todos los contratos y extraer inquilinos únicos
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<ApiResponse<List<Contrato>>> call = api.listarContratos(token);
 
         call.enqueue(new Callback<ApiResponse<List<Contrato>>>() {

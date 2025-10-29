@@ -5,8 +5,9 @@
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
         <domain includeSubdomains="true">10.0.2.2</domain>
-        <!-- Reemplaza con la IP local de tu PC obtenida con 'ipconfig' -->
+        <!-- IPs configuradas para desarrollo local -->
         <domain includeSubdomains="true">10.226.44.156</domain>
+        <domain includeSubdomains="true">192.168.248.156</domain>
         <domain includeSubdomains="true">192.168.1.105</domain>
         <domain includeSubdomains="true">192.168.0.105</domain>
         <domain includeSubdomains="true">192.168.43.1</domain>

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.InmuebleImagen;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
 
 import java.util.List;
 
@@ -20,7 +21,6 @@ public class ImagenesCarruselAdapter extends RecyclerView.Adapter<ImagenesCarrus
 
     private List<InmuebleImagen> imagenes;
     private Context context;
-    private String baseUrl = "http://10.226.44.156:5000/"; // ⚠️ Usar la misma IP del proyecto
 
     public ImagenesCarruselAdapter(Context context, List<InmuebleImagen> imagenes) {
         this.context = context;
@@ -61,6 +61,8 @@ public class ImagenesCarruselAdapter extends RecyclerView.Adapter<ImagenesCarrus
             
             // Si la URL no comienza con http, construir URL completa
             if (imageUrl != null && !imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+                // Usar detección automática de red WiFi
+                String baseUrl = ApiClient.getBaseUrl(context);
                 if (imageUrl.startsWith("/")) {
                     imageUrl = baseUrl + imageUrl.substring(1);
                 } else {

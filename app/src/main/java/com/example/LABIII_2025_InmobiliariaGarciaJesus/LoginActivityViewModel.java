@@ -51,7 +51,7 @@ public class LoginActivityViewModel extends AndroidViewModel{
     // Login con API antigua (compatibilidad)
     private void loginLegacy(String usuario, String clave){
         mCargando.postValue(true);
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<String> call = api.login(usuario, clave);
         
         call.enqueue(new Callback<String>() {
@@ -90,7 +90,7 @@ public class LoginActivityViewModel extends AndroidViewModel{
         Log.d("LOGIN", "Intentando login con email: " + email);
         
         LoginRequest loginRequest = new LoginRequest(email, password);
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<ApiResponse<LoginResponse>> call = api.loginNuevo(loginRequest);
         Log.d("LOGIN", "URL: " + call.request().url().toString());
         

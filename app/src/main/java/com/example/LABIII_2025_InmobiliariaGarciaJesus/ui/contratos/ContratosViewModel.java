@@ -62,7 +62,7 @@ public class ContratosViewModel extends AndroidViewModel {
             return;
         }
 
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<ApiResponse<List<Contrato>>> call = api.listarContratos(token);
 
         call.enqueue(new Callback<ApiResponse<List<Contrato>>>() {
@@ -107,7 +107,7 @@ public class ContratosViewModel extends AndroidViewModel {
             return;
         }
 
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<ApiResponse<List<Contrato>>> call = api.listarContratosPorInmueble(token, inmuebleId);
 
         call.enqueue(new Callback<ApiResponse<List<Contrato>>>() {

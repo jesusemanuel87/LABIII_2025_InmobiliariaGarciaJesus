@@ -32,6 +32,12 @@
             android:defaultValue="0"
             app:argType="integer" />
     </fragment>
+    
+    <fragment
+        android:id="@+id/cargarInmuebleFragment"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inmuebles.CargarInmuebleFragment"
+        android:label="Agregar Inmueble"
+        tools:layout="@layout/fragment_cargar_inmueble" />
     <fragment
         android:id="@+id/menu_inquilinos"
         android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inquilinos.InquilinosFragment"

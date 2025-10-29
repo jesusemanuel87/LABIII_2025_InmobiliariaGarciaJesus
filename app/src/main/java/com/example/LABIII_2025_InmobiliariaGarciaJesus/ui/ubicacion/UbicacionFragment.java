@@ -39,22 +39,16 @@ public class UbicacionFragment extends Fragment {
             }
         });
         
-        // Verificar si hay argumentos (inmueble específico)
-        if (getArguments() != null) {
-            double latitud = getArguments().getDouble("latitud", 0);
-            double longitud = getArguments().getDouble("longitud", 0);
-            String titulo = getArguments().getString("titulo", "Ubicación del Inmueble");
-            
-            if (latitud != 0 && longitud != 0) {
-                // Mostrar mapa del inmueble específico
-                mv.obtenerMapaInmueble(latitud, longitud, titulo);
-            } else {
-                // Mostrar mapa por defecto
-                mv.obtenerMapa();
-            }
+        // Pasar argumentos al ViewModel - este decide qué hacer
+        Bundle args = getArguments();
+        if (args != null) {
+            mv.procesarArgumentos(
+                args.getDouble("latitud", 0),
+                args.getDouble("longitud", 0),
+                args.getString("titulo", "Ubicación del Inmueble")
+            );
         } else {
-            // Mostrar mapa por defecto
-            mv.obtenerMapa();
+            mv.procesarArgumentos(0, 0, null);
         }
         
         return root;

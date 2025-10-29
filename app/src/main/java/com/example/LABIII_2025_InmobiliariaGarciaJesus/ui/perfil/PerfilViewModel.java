@@ -99,7 +99,7 @@ public class PerfilViewModel extends AndroidViewModel {
             return;
         }
 
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<ApiResponse<Propietario>> call = api.obtenerPerfil(token);
 
         call.enqueue(new Callback<ApiResponse<Propietario>>() {
@@ -182,7 +182,7 @@ public class PerfilViewModel extends AndroidViewModel {
         request.setTelefono(telefono != null ? telefono.trim() : null);
         request.setDireccion(propietarioActual.getDireccion());
 
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface();
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<ApiResponse<Propietario>> call = api.actualizarPerfil(token, request);
 
         call.enqueue(new Callback<ApiResponse<Propietario>>() {

@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
 
 import java.util.List;
 
@@ -102,8 +103,8 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
                 
                 // Si la URL no comienza con http, construir URL completa
                 if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
-                    // Construir URL completa usando la BASE_URL
-                    String baseUrl = "http://10.226.44.156:5000/";
+                    // Construir URL completa usando la BASE_URL de ApiClient con detección de red
+                    String baseUrl = ApiClient.getBaseUrl(itemView.getContext());
                     // Quitar el primer "/" si existe para evitar doble barra
                     if (imageUrl.startsWith("/")) {
                         imageUrl = baseUrl + imageUrl.substring(1);
