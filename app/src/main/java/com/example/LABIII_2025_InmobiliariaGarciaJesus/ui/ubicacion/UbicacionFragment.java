@@ -39,8 +39,7 @@ public class UbicacionFragment extends Fragment {
             }
         });
         
-        // Pasar argumentos al ViewModel - este decide qué hacer
-        Bundle args = getArguments();
+        // Pasar argumentos al ViewModel
         if (args != null) {
             mv.procesarArgumentos(
                 args.getDouble("latitud", 0),

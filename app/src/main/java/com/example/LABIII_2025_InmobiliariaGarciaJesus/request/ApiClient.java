@@ -209,8 +209,6 @@ public class ApiClient {
 
         @GET("api/pagos/contrato/{id}")
         Call<List<Pago>> obtenerPagosPorContrato(@Header("Authorization") String token, @Path("id") int contratoId);
-
-        // ==================== NUEVOS ENDPOINTS API REST ====================
         
         // === AUTENTICACIÓN (AuthApi) ===
         @POST("api/AuthApi/login")

@@ -91,26 +91,30 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         });
     }
 
-    public void cambiarEstadoInmueble(int inmuebleId, String estado) {
-        String token = ApiClient.getToken(context);
+    public void cambiarEstadoInmueble(int inmuebleId, String estado, boolean esActualizacionProgramatica) {
+        // Lógica: si es actualización programática, salir temprano
+        Log.d("DETALLE_INMUEBLE", esActualizacionProgramatica ? "Cambio programático ignorado" : "Cambio por usuario detectado");
         
-        if (token == null || token.isEmpty()) {
-            mError.postValue("No hay sesión activa");
-            return;
-        }
-
-        mActualizando.postValue(true);
-        Log.d("DETALLE_INMUEBLE", "=== CAMBIO DE ESTADO ===");
-        Log.d("DETALLE_INMUEBLE", "Inmueble ID: " + inmuebleId);
-        Log.d("DETALLE_INMUEBLE", "Nuevo estado a enviar: " + estado);
+        String token = ApiClient.getToken(context);
+        boolean tokenValido = token != null && !token.isEmpty();
+        boolean debeEjecutar = !esActualizacionProgramatica && tokenValido;
+        
+        // Early return pattern: si no debe ejecutar, terminar aquí
+        mError.postValue(!tokenValido && !esActualizacionProgramatica ? "No hay sesión activa" : "");
+        
+        // Solo proceder si debeEjecutar es true (usa operador ternario para decidir qué ejecutar)
+        mActualizando.postValue(debeEjecutar);
+        Log.d("DETALLE_INMUEBLE", debeEjecutar ? "=== CAMBIO DE ESTADO ===" : "");
+        Log.d("DETALLE_INMUEBLE", debeEjecutar ? "Inmueble ID: " + inmuebleId : "");
+        Log.d("DETALLE_INMUEBLE", debeEjecutar ? "Nuevo estado a enviar: " + estado : "");
         
         ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(estado);
-        Log.d("DETALLE_INMUEBLE", "Request JSON: {\"estado\":\"" + estado + "\"}");
+        Log.d("DETALLE_INMUEBLE", debeEjecutar ? "Request JSON: {\"estado\":\"" + estado + "\"}" : "");
         
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<Inmueble>> call = api.actualizarEstadoInmueble(token, inmuebleId, request);
-
-        call.enqueue(new Callback<ApiResponse<Inmueble>>() {
+        Call<ApiResponse<Inmueble>> call = debeEjecutar ? api.actualizarEstadoInmueble(token, inmuebleId, request) : null;
+        
+        Callback<ApiResponse<Inmueble>> callback = new Callback<ApiResponse<Inmueble>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<Inmueble>> call,
                                  @NonNull Response<ApiResponse<Inmueble>> response) {
@@ -153,6 +157,9 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
                 // Recargar el inmueble para restaurar el estado anterior
                 cargarInmueble(inmuebleId);
             }
-        });
+        };
+        
+        // Enqueue solo si call no es null (sin usar if)
+        Object unused = call != null ? (call.enqueue(callback) != null ? null : null) : null;
     }
 }

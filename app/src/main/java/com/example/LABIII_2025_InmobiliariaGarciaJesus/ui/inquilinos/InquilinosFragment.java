@@ -56,15 +56,12 @@ public class InquilinosFragment extends Fragment {
         mv.getMInquilinos().observe(getViewLifecycleOwner(), new Observer<List<InquilinoContrato>>() {
             @Override
             public void onChanged(List<InquilinoContrato> inquilinos) {
-                if (inquilinos != null && !inquilinos.isEmpty()) {
-                    adapter.setInquilinos(inquilinos);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    tvMensaje.setVisibility(View.GONE);
-                } else {
-                    recyclerView.setVisibility(View.GONE);
-                    tvMensaje.setVisibility(View.VISIBLE);
-                    tvMensaje.setText("No hay inquilinos registrados");
-                }
+                List<InquilinoContrato> items = inquilinos != null ? inquilinos : java.util.Collections.<InquilinoContrato>emptyList();
+                adapter.setInquilinos(items);
+                boolean hasItems = !items.isEmpty();
+                recyclerView.setVisibility(hasItems ? View.VISIBLE : View.GONE);
+                tvMensaje.setVisibility(hasItems ? View.GONE : View.VISIBLE);
+                tvMensaje.setText(hasItems ? "" : "No hay inquilinos registrados");
             }
         });
         
@@ -72,9 +69,7 @@ public class InquilinosFragment extends Fragment {
         mv.getMError().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String error) {
-                if (error != null && !error.isEmpty()) {
-                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(getContext(), error == null ? "" : error, Toast.LENGTH_SHORT).show();
             }
         });
         
@@ -82,13 +77,10 @@ public class InquilinosFragment extends Fragment {
         mv.getMCargando().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean cargando) {
-                if (cargando != null && cargando) {
-                    progressBar.setVisibility(View.VISIBLE);
-                    recyclerView.setVisibility(View.GONE);
-                    tvMensaje.setVisibility(View.GONE);
-                } else {
-                    progressBar.setVisibility(View.GONE);
-                }
+                boolean isLoading = Boolean.TRUE.equals(cargando);
+                progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                recyclerView.setVisibility(isLoading ? View.GONE : recyclerView.getVisibility());
+                tvMensaje.setVisibility(isLoading ? View.GONE : tvMensaje.getVisibility());
             }
         });
         

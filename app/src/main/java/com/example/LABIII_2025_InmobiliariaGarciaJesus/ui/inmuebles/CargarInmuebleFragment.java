@@ -135,9 +135,7 @@ public class CargarInmuebleFragment extends Fragment {
         mv.getMMensaje().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String mensaje) {
-                if (mensaje != null && !mensaje.isEmpty()) {
-                    Toast.makeText(getContext(), mensaje, Toast.LENGTH_LONG).show();
-                }
+                Toast.makeText(getContext(), mensaje == null ? "" : mensaje, Toast.LENGTH_LONG).show();
             }
         });
 
@@ -145,13 +143,9 @@ public class CargarInmuebleFragment extends Fragment {
         mv.getMCargando().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean cargando) {
-                if (cargando != null && cargando) {
-                    progressBar.setVisibility(View.VISIBLE);
-                    btnGuardar.setEnabled(false);
-                } else {
-                    progressBar.setVisibility(View.GONE);
-                    btnGuardar.setEnabled(true);
-                }
+                boolean isLoading = Boolean.TRUE.equals(cargando);
+                progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                btnGuardar.setEnabled(!isLoading);
             }
         });
 

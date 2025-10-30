@@ -98,14 +98,13 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
             if (inmueble.getImagenPortadaUrl() != null && !inmueble.getImagenPortadaUrl().isEmpty()) {
                 String imageUrl = inmueble.getImagenPortadaUrl();
                 
-                // Log para debug
                 Log.d("INMUEBLES_ADAPTER", "URL original de imagen: " + imageUrl);
                 
                 // Si la URL no comienza con http, construir URL completa
                 if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
-                    // Construir URL completa usando la BASE_URL de ApiClient con detección de red
+                    
                     String baseUrl = ApiClient.getBaseUrl(itemView.getContext());
-                    // Quitar el primer "/" si existe para evitar doble barra
+                    
                     if (imageUrl.startsWith("/")) {
                         imageUrl = baseUrl + imageUrl.substring(1);
                     } else {

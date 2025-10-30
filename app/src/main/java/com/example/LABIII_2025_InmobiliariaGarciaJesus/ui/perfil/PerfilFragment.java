@@ -31,15 +31,19 @@ public class PerfilFragment extends Fragment {
         mv.getMPropietario().observe(getViewLifecycleOwner(), new Observer<Propietario>() {
             @Override
             public void onChanged(Propietario propietario) {
-                if (propietario != null) {
-                    binding.tvNombreCompleto.setText(propietario.getNombre() + " " + propietario.getApellido());
-                    binding.tvEmailHeader.setText(propietario.getEmail());
-                    binding.tvDni.setText(propietario.getDni() != null ? propietario.getDni() : "No especificado");
-                    binding.tvNombre.setText(propietario.getNombre());
-                    binding.tvApellido.setText(propietario.getApellido());
-                    binding.tvEmail.setText(propietario.getEmail());
-                    binding.tvTelefono.setText(propietario.getTelefono() != null ? propietario.getTelefono() : "No especificado");
-                }
+                String nombre = propietario != null ? propietario.getNombre() : "";
+                String apellido = propietario != null ? propietario.getApellido() : "";
+                String email = propietario != null ? propietario.getEmail() : "";
+                String dni = propietario != null && propietario.getDni() != null ? propietario.getDni() : "No especificado";
+                String telefono = propietario != null && propietario.getTelefono() != null ? propietario.getTelefono() : "No especificado";
+                
+                binding.tvNombreCompleto.setText(nombre + " " + apellido);
+                binding.tvEmailHeader.setText(email);
+                binding.tvDni.setText(dni);
+                binding.tvNombre.setText(nombre);
+                binding.tvApellido.setText(apellido);
+                binding.tvEmail.setText(email);
+                binding.tvTelefono.setText(telefono);
             }
         });
 
@@ -47,9 +51,7 @@ public class PerfilFragment extends Fragment {
         mv.getMError().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String error) {
-                if (error != null && !error.isEmpty()) {
-                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(getContext(), error == null ? "" : error, Toast.LENGTH_SHORT).show();
             }
         });
 

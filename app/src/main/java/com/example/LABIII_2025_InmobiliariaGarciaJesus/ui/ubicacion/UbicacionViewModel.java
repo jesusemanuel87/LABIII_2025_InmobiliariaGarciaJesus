@@ -90,19 +90,13 @@ public class UbicacionViewModel extends AndroidViewModel {
         };
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions.
-            return;
+                return;
         }
         fused.requestLocationUpdates(request, callback, null);
     }
 
-    /**
-     * Procesa los argumentos recibidos del Fragment y decide qué mapa mostrar
-     * Esta lógica antes estaba en el Fragment (antipatrón)
-     */
     public void procesarArgumentos(double latitud, double longitud, String titulo) {
-        // Validar si las coordenadas son válidas (diferentes de 0)
+        
         if (latitud != 0 && longitud != 0) {
             // Mostrar mapa del inmueble específico
             obtenerMapaInmueble(latitud, longitud, titulo);
@@ -114,13 +108,13 @@ public class UbicacionViewModel extends AndroidViewModel {
     
     public void obtenerMapa(){
         // Mapa por defecto (San Luis)
-        MapaActual mapaActual = new MapaActual(-33.280576, -66.332482, "San Luis", 20);
+        MapaActual mapaActual = new MapaActual(-33.280576, -66.332482, "San Luis", 15);
         mMapa.setValue(mapaActual);
     }
     
     public void obtenerMapaInmueble(double latitud, double longitud, String titulo){
         // Mapa de un inmueble específico
-        MapaActual mapaActual = new MapaActual(latitud, longitud, titulo, 20);
+        MapaActual mapaActual = new MapaActual(latitud, longitud, titulo, 15);
         mMapa.setValue(mapaActual);
     }
     
@@ -144,13 +138,13 @@ public class UbicacionViewModel extends AndroidViewModel {
             marcador.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
             googleMap.addMarker(marcador);
-            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(ubicacion)
                     .zoom(zoom)
-                    .bearing(45)
-                    .tilt(45)
+                    .bearing(0)
+                    .tilt(0)
                     .build();
             CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
             googleMap.animateCamera(cameraUpdate);

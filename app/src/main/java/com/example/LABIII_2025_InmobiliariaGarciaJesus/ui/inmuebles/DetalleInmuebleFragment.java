@@ -44,6 +44,7 @@ public class DetalleInmuebleFragment extends Fragment {
     private Inmueble inmuebleActual;
     private ImagenesCarruselAdapter imagenesAdapter;
     private ImageView[] indicadores;
+    private boolean ignorarCambiosSwitch = false;
 
     public static DetalleInmuebleFragment newInstance(int inmuebleId) {
         DetalleInmuebleFragment fragment = new DetalleInmuebleFragment();
@@ -88,39 +89,32 @@ public class DetalleInmuebleFragment extends Fragment {
         mv.getMInmueble().observe(getViewLifecycleOwner(), new Observer<Inmueble>() {
             @Override
             public void onChanged(Inmueble inmueble) {
-                if (inmueble != null) {
-                    inmuebleActual = inmueble;
-                    mostrarDatosInmueble(inmueble);
-                }
+                inmuebleActual = inmueble;
+                mostrarDatosInmueble(inmueble != null ? inmueble : new Inmueble());
             }
         });
         
         // Listener del botón Ver en Mapa
-        btnVerEnMapa.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (inmuebleActual != null && inmuebleActual.getLatitud() != null && inmuebleActual.getLongitud() != null) {
-                    // Crear bundle con los datos del inmueble
-                    Bundle bundle = new Bundle();
-                    bundle.putDouble("latitud", inmuebleActual.getLatitud());
-                    bundle.putDouble("longitud", inmuebleActual.getLongitud());
-                    bundle.putString("titulo", inmuebleActual.getDireccion());
-                    
-                    // Navegar al fragment de ubicación
-                    Navigation.findNavController(v).navigate(R.id.menu_inicio, bundle);
-                } else {
-                    Toast.makeText(getContext(), "No hay coordenadas disponibles para este inmueble", Toast.LENGTH_SHORT).show();
-                }
-            }
+        btnVerEnMapa.setOnClickListener(v -> {
+            boolean hasCoordinates = inmuebleActual != null && inmuebleActual.getLatitud() != null && inmuebleActual.getLongitud() != null;
+            String mensaje = hasCoordinates ? "" : "No hay coordenadas disponibles para este inmueble";
+            
+            Toast.makeText(getContext(), mensaje, Toast.LENGTH_SHORT).show();
+            
+            Bundle bundle = new Bundle();
+            bundle.putDouble("latitud", hasCoordinates ? inmuebleActual.getLatitud() : 0);
+            bundle.putDouble("longitud", hasCoordinates ? inmuebleActual.getLongitud() : 0);
+            bundle.putString("titulo", hasCoordinates ? inmuebleActual.getDireccion() : "");
+            
+            int destination = hasCoordinates ? R.id.menu_inicio : -1;
+            Navigation.findNavController(v).navigate(destination >= 0 ? destination : v.getId(), bundle);
         });
         
         // Observer para errores
         mv.getMError().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String error) {
-                if (error != null && !error.isEmpty()) {
-                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(getContext(), error == null ? "" : error, Toast.LENGTH_SHORT).show();
             }
         });
         
@@ -128,25 +122,19 @@ public class DetalleInmuebleFragment extends Fragment {
         mv.getMActualizando().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean actualizando) {
-                if (actualizando != null && actualizando) {
-                    progressBar.setVisibility(View.VISIBLE);
-                    switchDisponible.setEnabled(false);
-                } else {
-                    progressBar.setVisibility(View.GONE);
-                    switchDisponible.setEnabled(true);
-                }
+                boolean isUpdating = Boolean.TRUE.equals(actualizando);
+                progressBar.setVisibility(isUpdating ? View.VISIBLE : View.GONE);
+                switchDisponible.setEnabled(!isUpdating);
             }
         });
         
-        // Listener del switch
-        switchDisponible.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (buttonView.isPressed()) { // Solo cuando el usuario lo cambia manualmente
-                    String estadoTexto = isChecked ? "Activo" : "Inactivo";
-                    mv.cambiarEstadoInmueble(inmuebleId, estadoTexto);
-                }
-            }
+        // Listener del switch - solo llama al ViewModel si no es cambio
+        switchDisponible.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            boolean esActualizacionProgramatica = ignorarCambiosSwitch;
+            ignorarCambiosSwitch = false;
+            
+            String estadoTexto = isChecked ? "Activo" : "Inactivo";
+            mv.cambiarEstadoInmueble(inmuebleId, estadoTexto, esActualizacionProgramatica);
         });
         
         // Cargar datos del inmueble
@@ -222,25 +210,12 @@ public class DetalleInmuebleFragment extends Fragment {
         tvEstado.setText("Estado: " + inmueble.getEstado());
         
         // Configurar switch según el estado y disponibilidad
-        switchDisponible.setOnCheckedChangeListener(null);
-        
-        // El switch muestra el estado (Activo/Inactivo)
         boolean esActivo = "Activo".equals(inmueble.getEstado());
-        switchDisponible.setChecked(esActivo);
-        
-        // Habilitar switch solo si la disponibilidad es "Disponible"
         boolean puedeModificar = "Disponible".equals(disponibilidad);
-        switchDisponible.setEnabled(puedeModificar);
         
-        switchDisponible.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (buttonView.isPressed()) {
-                    String estadoTexto = isChecked ? "Activo" : "Inactivo";
-                    mv.cambiarEstadoInmueble(inmuebleId, estadoTexto);
-                }
-            }
-        });
+        ignorarCambiosSwitch = true;
+        switchDisponible.setChecked(esActivo);
+        switchDisponible.setEnabled(puedeModificar);
     }
     
     private void configurarIndicadores(int cantidad) {

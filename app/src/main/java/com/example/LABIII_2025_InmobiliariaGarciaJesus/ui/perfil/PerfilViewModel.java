@@ -86,10 +86,9 @@ public class PerfilViewModel extends AndroidViewModel {
     }
 
     public void cargarPerfil() {
-        cargarPerfilNuevo(); // Usar nuevo endpoint REST
+        cargarPerfilNuevo();
     }
     
-    // Método REST - obtener perfil desde el token
     private void cargarPerfilNuevo() {
         String token = ApiClient.getToken(context);
 
