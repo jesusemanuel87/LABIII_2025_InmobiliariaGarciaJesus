@@ -21,9 +21,11 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
@@ -274,5 +276,26 @@ public class ApiClient {
         // === TIPOS DE INMUEBLE API ===
         @GET("api/TiposInmuebleApi")
         Call<ApiResponse<List<TipoInmueble>>> listarTiposInmueble(@Header("Authorization") String token);
+        
+        // === NOTIFICACIONES API ===
+        @GET("api/NotificacionesApi")
+        Call<ApiResponse<List<Notificacion>>> listarNotificaciones(@Header("Authorization") String token);
+        
+        @GET("api/NotificacionesApi/no-leidas")
+        Call<ApiResponse<List<Notificacion>>> listarNotificacionesNoLeidas(@Header("Authorization") String token);
+        
+        @GET("api/NotificacionesApi/contador")
+        Call<ApiResponse<Integer>> obtenerContadorNoLeidas(@Header("Authorization") String token);
+        
+        @PATCH("api/NotificacionesApi/{id}/marcar-leida")
+        Call<ApiResponse<Void>> marcarNotificacionComoLeida(@Header("Authorization") String token,
+                                                            @Path("id") int notificacionId);
+        
+        @PATCH("api/NotificacionesApi/marcar-todas-leidas")
+        Call<ApiResponse<String>> marcarTodasLasNotificacionesComoLeidas(@Header("Authorization") String token);
+        
+        @HTTP(method = "DELETE", path = "api/NotificacionesApi/{id}", hasBody = false)
+        Call<ApiResponse<Void>> eliminarNotificacion(@Header("Authorization") String token,
+                                                     @Path("id") int notificacionId);
     }
 }

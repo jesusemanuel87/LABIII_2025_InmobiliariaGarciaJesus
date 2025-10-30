@@ -24,5 +24,6 @@
     <string name="menu_inmuebles">Inmuebles</string>
     <string name="menu_inquilinos">Inquilinos</string>
     <string name="menu_contratos">Contratos</string>
+    <string name="menu_notificaciones">Notificaciones</string>
 
 </resources>

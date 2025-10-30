@@ -48,7 +48,12 @@
         android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.contratos.ContratosFragment"
         android:label="@string/menu_contratos"
         tools:layout="@layout/fragment_contratos" />
-
+    
+    <fragment
+        android:id="@+id/menu_notificaciones"
+        android:name="com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.notificaciones.NotificacionesFragment"
+        android:label="@string/menu_notificaciones"
+        tools:layout="@layout/fragment_notificaciones" />
 
     <fragment
         android:id="@+id/menu_salir"

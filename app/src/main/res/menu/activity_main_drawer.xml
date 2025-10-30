@@ -25,6 +25,10 @@
             android:id="@+id/menu_contratos"
             android:icon="@drawable/ic_contract"
             android:title="@string/menu_contratos" />
+        <item
+            android:id="@+id/menu_notificaciones"
+            android:icon="@android:drawable/ic_popup_reminder"
+            android:title="@string/menu_notificaciones" />
     </group>
     <item
         android:id="@+id/menu_salir"
