@@ -100,10 +100,20 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
                 
                 Log.d("INMUEBLES_ADAPTER", "URL original de imagen: " + imageUrl);
                 
+                // Reemplazar localhost con DevTunnel URL
+                if (imageUrl.contains("localhost:5000") || imageUrl.contains("127.0.0.1:5000")) {
+                    String baseUrl = ApiClient.getBaseUrl(itemView.getContext());
+                    imageUrl = imageUrl.replace("http://localhost:5000/", baseUrl);
+                    imageUrl = imageUrl.replace("https://localhost:5000/", baseUrl);
+                    imageUrl = imageUrl.replace("http://127.0.0.1:5000/", baseUrl);
+                    imageUrl = imageUrl.replace("https://127.0.0.1:5000/", baseUrl);
+                    Log.d("INMUEBLES_ADAPTER", "URL localhost reemplazada: " + imageUrl);
+                }
                 // Si la URL no comienza con http, construir URL completa
-                if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+                else if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
                     
                     String baseUrl = ApiClient.getBaseUrl(itemView.getContext());
+                    Log.d("INMUEBLES_ADAPTER", "Base URL: " + baseUrl);
                     
                     if (imageUrl.startsWith("/")) {
                         imageUrl = baseUrl + imageUrl.substring(1);
@@ -111,6 +121,8 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
                         imageUrl = baseUrl + imageUrl;
                     }
                     Log.d("INMUEBLES_ADAPTER", "URL completa construida: " + imageUrl);
+                } else {
+                    Log.d("INMUEBLES_ADAPTER", "URL ya incluye protocolo: " + imageUrl);
                 }
                 
                 Glide.with(itemView.getContext())

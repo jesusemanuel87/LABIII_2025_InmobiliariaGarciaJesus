@@ -114,7 +114,10 @@ public class DetalleInmuebleFragment extends Fragment {
         mv.getMError().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String error) {
-                Toast.makeText(getContext(), error == null ? "" : error, Toast.LENGTH_SHORT).show();
+                // Solo mostrar Toast si hay error real
+                if (error != null && !error.isEmpty()) {
+                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                }
             }
         });
         

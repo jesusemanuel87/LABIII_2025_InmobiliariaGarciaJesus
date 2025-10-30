@@ -57,24 +57,36 @@ public class ImagenesCarruselAdapter extends RecyclerView.Adapter<ImagenesCarrus
         public void bind(InmuebleImagen imagen) {
             String imageUrl = imagen.getRutaCompleta();
             
-            Log.d("CARRUSEL", "Cargando imagen: " + imageUrl);
+            Log.d("CARRUSEL", "URL original: " + imageUrl);
             
-            // Si la URL no comienza con http, construir URL completa
-            if (imageUrl != null && !imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
-                // Usar detección automática de red WiFi
+            // Reemplazar localhost con DevTunnel URL
+            if (imageUrl != null && (imageUrl.contains("localhost:5000") || imageUrl.contains("127.0.0.1:5000"))) {
                 String baseUrl = ApiClient.getBaseUrl(context);
+                imageUrl = imageUrl.replace("http://localhost:5000/", baseUrl);
+                imageUrl = imageUrl.replace("https://localhost:5000/", baseUrl);
+                imageUrl = imageUrl.replace("http://127.0.0.1:5000/", baseUrl);
+                imageUrl = imageUrl.replace("https://127.0.0.1:5000/", baseUrl);
+                Log.d("CARRUSEL", "URL localhost reemplazada: " + imageUrl);
+            }
+            // Si la URL no comienza con http, construir URL completa
+            else if (imageUrl != null && !imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+                String baseUrl = ApiClient.getBaseUrl(context);
+                Log.d("CARRUSEL", "Base URL: " + baseUrl);
+                
                 if (imageUrl.startsWith("/")) {
                     imageUrl = baseUrl + imageUrl.substring(1);
                 } else {
                     imageUrl = baseUrl + imageUrl;
                 }
-                Log.d("CARRUSEL", "URL completa: " + imageUrl);
+                Log.d("CARRUSEL", "URL completa construida: " + imageUrl);
+            } else {
+                Log.d("CARRUSEL", "URL ya tiene protocolo o es null");
             }
             
             Glide.with(context)
                     .load(imageUrl)
-                    .placeholder(R.drawable.ic_launcher_background)
-                    .error(R.drawable.ic_launcher_background)
+                    .placeholder(R.drawable.ic_home)
+                    .error(R.drawable.ic_home)
                     .centerCrop()
                     .into(ivImagen);
         }

@@ -16,7 +16,10 @@ import com.google.gson.GsonBuilder;
 import java.util.List;
 
 import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -37,59 +40,46 @@ import retrofit2.http.Path;
 public class ApiClient {
 
     // Configuración de IPs por red WiFi
-    private static final String IP_POCO = "http://192.168.248.156:5000/";
+    /* private static final String IP_POCO = "http://192.168.248.156:5000/";
     private static final String IP_TENDA = "http://10.226.44.156:5000/";
     private static final String IP_EMULADOR = "http://10.0.2.2:5000/";
-    private static final String IP_DEFAULT = IP_POCO; // IP por defecto
+    */
+    private static final String IP_DEFAULT = "https://g3kgc7hj-5000.brs.devtunnels.ms/"; // DevTunnel HTTPS
 
     private static MyApiInterface myApiInterface;
     private static String accessToken = null;
 
     /**
-     * Detecta la red WiFi actual y retorna la URL base correspondiente
+     * Retorna la URL base configurada (DevTunnel)
      */
     private static String getBaseUrlByNetwork(Context context) {
-        try {
-            WifiManager wifiManager = (WifiManager) context.getApplicationContext()
-                    .getSystemService(Context.WIFI_SERVICE);
-            
-            if (wifiManager != null && wifiManager.isWifiEnabled()) {
-                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-                if (wifiInfo != null) {
-                    String ssid = wifiInfo.getSSID();
-                    // Remover comillas del SSID
-                    if (ssid != null) {
-                        ssid = ssid.replace("\"", "");
-                        Log.d("API_CLIENT", "Red WiFi detectada: " + ssid);
-                        
-                        // Seleccionar IP según el SSID
-                        if (ssid.equals("POCO")) {
-                            Log.d("API_CLIENT", "Usando IP de red POCO: " + IP_POCO);
-                            return IP_POCO;
-                        } else if (ssid.equals("Tenda_58EBC0")) {
-                            Log.d("API_CLIENT", "Usando IP de red Tenda: " + IP_TENDA);
-                            return IP_TENDA;
-                        }
-                    }
-                }
-            }
-            
-            // Si no se detecta WiFi o no coincide con redes conocidas
-            Log.d("API_CLIENT", "Red no reconocida o sin WiFi, usando IP por defecto: " + IP_DEFAULT);
-            return IP_DEFAULT;
-            
-        } catch (Exception e) {
-            Log.e("API_CLIENT", "Error detectando red WiFi: " + e.getMessage());
-            return IP_DEFAULT;
-        }
+        Log.d("API_CLIENT", "Usando URL: " + IP_DEFAULT);
+        return IP_DEFAULT;
     }
 
     /**
-     * Obtiene la interfaz API con detección automática de red WiFi
+     * Obtiene la interfaz API configurada con DevTunnel
      * @param context Context de la aplicación
      */
     public static MyApiInterface getMyApiInterface(Context context){
         String baseUrl = getBaseUrlByNetwork(context);
+        
+        // Configurar logging interceptor para debug
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> 
+            Log.d("API_HTTP", message)
+        );
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
+        
+        // Crear OkHttpClient con interceptor
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+                    Log.d("API_CLIENT", "Request URL: " + original.url());
+                    Log.d("API_CLIENT", "Headers: " + original.headers().toString());
+                    return chain.proceed(original);
+                })
+                .build();
         
         Gson gson = new GsonBuilder()
                 .setLenient()
@@ -98,6 +88,7 @@ public class ApiClient {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
+                .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
         Log.d("API_CLIENT", "Base URL configurada: " + retrofit.baseUrl().toString());
@@ -176,7 +167,7 @@ public class ApiClient {
     }
 
     /**
-     * Obtiene la URL base detectando automáticamente la red WiFi
+     * Obtiene la URL base configurada (DevTunnel)
      * @param context Context de la aplicación
      */
     public static String getBaseUrl(Context context){
@@ -184,8 +175,7 @@ public class ApiClient {
     }
 
     /**
-     * Versión legacy para compatibilidad (sin context)
-     * Usa IP por defecto
+     * Obtiene la URL base configurada (DevTunnel) - versión sin context
      */
     public static String getBaseUrl(){
         return IP_DEFAULT;

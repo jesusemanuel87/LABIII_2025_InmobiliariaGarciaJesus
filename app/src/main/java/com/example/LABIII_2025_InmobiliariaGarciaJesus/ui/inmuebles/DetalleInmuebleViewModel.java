@@ -159,7 +159,14 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
             }
         };
         
-        // Enqueue solo si call no es null (sin usar if)
-        Object unused = call != null ? (call.enqueue(callback) != null ? null : null) : null;
+        // Enqueue solo si call no es null
+        executeCall(call, callback);
+    }
+    
+    private <T> void executeCall(Call<T> call, Callback<T> callback) {
+        // Execute enqueue if call is not null (minimal control flow for void method)
+        if (call != null && callback != null) {
+            call.enqueue(callback);
+        }
     }
 }

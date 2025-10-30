@@ -95,7 +95,7 @@ public class NotificacionesViewModel extends AndroidViewModel {
             }
         };
         
-        Object unused = call != null ? (call.enqueue(callback) != null ? null : null) : null;
+        executeCall(call, callback);
     }
 
     public void cargarContadorNoLeidas() {
@@ -125,7 +125,7 @@ public class NotificacionesViewModel extends AndroidViewModel {
             }
         };
         
-        Object unused = call != null ? (call.enqueue(callback) != null ? null : null) : null;
+        executeCall(call, callback);
     }
 
     public void marcarComoLeida(int notificacionId) {
@@ -154,7 +154,7 @@ public class NotificacionesViewModel extends AndroidViewModel {
             }
         };
         
-        Object unused = call != null ? (call.enqueue(callback) != null ? null : null) : null;
+        executeCall(call, callback);
     }
 
     public void marcarTodasComoLeidas() {
@@ -189,7 +189,7 @@ public class NotificacionesViewModel extends AndroidViewModel {
             }
         };
         
-        Object unused = call != null ? (call.enqueue(callback) != null ? null : null) : null;
+        executeCall(call, callback);
     }
 
     public void eliminarNotificacion(int notificacionId) {
@@ -220,6 +220,13 @@ public class NotificacionesViewModel extends AndroidViewModel {
             }
         };
         
-        Object unused = call != null ? (call.enqueue(callback) != null ? null : null) : null;
+        executeCall(call, callback);
+    }
+    
+    private <T> void executeCall(Call<T> call, Callback<T> callback) {
+        // Execute enqueue if call is not null (minimal control flow for void method)
+        if (call != null && callback != null) {
+            call.enqueue(callback);
+        }
     }
 }

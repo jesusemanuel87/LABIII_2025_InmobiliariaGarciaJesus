@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Permitir cleartext (HTTP) para desarrollo local -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">127.0.0.1</domain>
-        <domain includeSubdomains="true">10.0.2.2</domain>
-        <!-- IPs configuradas para desarrollo local -->
-        <domain includeSubdomains="true">10.226.44.156</domain>
-        <domain includeSubdomains="true">192.168.248.156</domain>
-        <domain includeSubdomains="true">192.168.1.105</domain>
-        <domain includeSubdomains="true">192.168.0.105</domain>
-        <domain includeSubdomains="true">192.168.43.1</domain>
+    <!-- Configuración para DevTunnel HTTPS -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">devtunnels.ms</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
     </domain-config>
     
-    <!-- Para Azure u otros servidores HTTPS -->
+    <!-- Configuración global: HTTPS preferido -->
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system" />
+            <certificates src="user" />
         </trust-anchors>
     </base-config>
 </network-security-config>

@@ -69,8 +69,9 @@ public class NotificacionesAdapter extends RecyclerView.Adapter<NotificacionesAd
         holder.itemView.setBackgroundColor(esNoLeida ? Color.parseColor("#E3F2FD") : Color.WHITE);
         
         holder.itemView.setOnClickListener(v -> {
-            OnNotificacionClickListener currentListener = listener;
-            Object unused = currentListener != null ? (currentListener.onNotificacionClick(notificacion) != null ? null : null) : null;
+            if (listener != null) {
+                listener.onNotificacionClick(notificacion);
+            }
         });
     }
 
