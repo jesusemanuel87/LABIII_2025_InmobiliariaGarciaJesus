@@ -2,6 +2,7 @@ package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.contratos;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import android.os.Bundle;
 
@@ -52,6 +53,14 @@ public class ContratosFragment extends Fragment {
         adapter = new ContratosAdapter(new ArrayList<>(), getContext());
         recyclerView.setAdapter(adapter);
         
+        // Configurar listener para click en contratos
+        adapter.setOnContratoClickListener(contrato -> {
+            // Navegar al detalle del contrato
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("contrato", contrato);
+            Navigation.findNavController(root).navigate(R.id.action_contratosFragment_to_detalleContratoFragment, bundle);
+        });
+        
         // Observer para lista de contratos
         mv.getMContratos().observe(getViewLifecycleOwner(), new Observer<List<Contrato>>() {
             @Override
@@ -69,7 +78,9 @@ public class ContratosFragment extends Fragment {
         mv.getMError().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String error) {
-                Toast.makeText(getContext(), error == null ? "" : error, Toast.LENGTH_SHORT).show();
+                if (error != null && !error.isEmpty()) {
+                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                }
             }
         });
         

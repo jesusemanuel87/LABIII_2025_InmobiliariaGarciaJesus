@@ -25,7 +25,7 @@ import retrofit2.Response;
 
 public class InquilinosViewModel extends AndroidViewModel {
     private final Context context;
-    private MutableLiveData<List<InquilinoContrato>> mInquilinos;
+    private MutableLiveData<List<Contrato>> mContratosActivos;
     private MutableLiveData<String> mError;
     private MutableLiveData<Boolean> mCargando;
 
@@ -34,11 +34,11 @@ public class InquilinosViewModel extends AndroidViewModel {
         this.context = application.getApplicationContext();
     }
 
-    public LiveData<List<InquilinoContrato>> getMInquilinos() {
-        if (mInquilinos == null) {
-            mInquilinos = new MutableLiveData<>();
+    public LiveData<List<Contrato>> getMContratosActivos() {
+        if (mContratosActivos == null) {
+            mContratosActivos = new MutableLiveData<>();
         }
-        return mInquilinos;
+        return mContratosActivos;
     }
 
     public LiveData<String> getMError() {
@@ -55,7 +55,7 @@ public class InquilinosViewModel extends AndroidViewModel {
         return mCargando;
     }
 
-    public void cargarInquilinos() {
+    public void cargarInmueblesAlquilados() {
         mCargando.postValue(true);
         String token = ApiClient.getToken(context);
 
@@ -66,7 +66,7 @@ public class InquilinosViewModel extends AndroidViewModel {
             return;
         }
 
-        // Obtener todos los contratos y extraer inquilinos únicos
+        // Obtener todos los contratos activos
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<ApiResponse<List<Contrato>>> call = api.listarContratos(token);
 
@@ -79,18 +79,19 @@ public class InquilinosViewModel extends AndroidViewModel {
                     ApiResponse<List<Contrato>> apiResponse = response.body();
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
                         List<Contrato> contratos = apiResponse.getData();
-                        List<InquilinoContrato> inquilinosUnicos = extraerInquilinosUnicos(contratos);
-                        Log.d("INQUILINOS", "Inquilinos cargados: " + inquilinosUnicos.size());
-                        mInquilinos.postValue(inquilinosUnicos);
+                        // Filtrar solo contratos activos
+                        List<Contrato> contratosActivos = filtrarContratosActivos(contratos);
+                        Log.d("INQUILINOS", "Inmuebles alquilados (contratos activos): " + contratosActivos.size());
+                        mContratosActivos.postValue(contratosActivos);
                     } else {
                         String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al cargar inquilinos";
+                            apiResponse.getMessage() : "Error al cargar inmuebles alquilados";
                         Log.d("INQUILINOS", "Error en respuesta: " + errorMsg);
                         mError.postValue(errorMsg);
                     }
                 } else {
                     Log.d("INQUILINOS", "Error HTTP: " + response.code());
-                    mError.postValue("Error al cargar inquilinos: " + response.code());
+                    mError.postValue("Error al cargar inmuebles alquilados: " + response.code());
                 }
             }
 
@@ -104,21 +105,18 @@ public class InquilinosViewModel extends AndroidViewModel {
         });
     }
 
-    private List<InquilinoContrato> extraerInquilinosUnicos(List<Contrato> contratos) {
-        Set<Integer> idsInquilinos = new HashSet<>();
-        List<InquilinoContrato> inquilinosUnicos = new ArrayList<>();
+    private List<Contrato> filtrarContratosActivos(List<Contrato> contratos) {
+        List<Contrato> contratosActivos = new ArrayList<>();
 
         for (Contrato contrato : contratos) {
-            if (contrato.getInquilino() != null) {
-                InquilinoContrato inquilino = contrato.getInquilino();
-                // Solo agregar si no se ha agregado antes (por ID único)
-                if (!idsInquilinos.contains(inquilino.getId())) {
-                    idsInquilinos.add(inquilino.getId());
-                    inquilinosUnicos.add(inquilino);
-                }
+            // Filtrar solo contratos con estado "Activo" o "Vigente"
+            if (contrato.getEstado() != null && 
+                (contrato.getEstado().equalsIgnoreCase("Activo") || 
+                 contrato.getEstado().equalsIgnoreCase("Vigente"))) {
+                contratosActivos.add(contrato);
             }
         }
 
-        return inquilinosUnicos;
+        return contratosActivos;
     }
 }
