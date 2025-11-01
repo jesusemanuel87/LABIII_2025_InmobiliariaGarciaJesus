@@ -206,9 +206,11 @@ public class ApiClient {
         @POST("api/AuthApi/login")
         Call<ApiResponse<LoginResponse>> loginNuevo(@Body LoginRequest loginRequest);
 
-        @POST("api/AuthApi/cambiar-password")
-        Call<ApiResponseSimple> cambiarPassword(@Header("Authorization") String token, 
-                                                @Body CambiarPasswordRequest request);
+        @FormUrlEncoded
+        @PUT("api/Propietarios/changePassword")
+        Call<Void> cambiarPassword(@Header("Authorization") String token, 
+                                   @Field("currentPassword") String currentPassword,
+                                   @Field("newPassword") String newPassword);
 
         @POST("api/AuthApi/reset-password")
         Call<ApiResponse<ResetPasswordResponse>> resetPassword(@Body ResetPasswordRequest request);
@@ -217,9 +219,9 @@ public class ApiClient {
         @GET("api/PropietarioApi/perfil")
         Call<ApiResponse<Propietario>> obtenerPerfil(@Header("Authorization") String token);
 
-        @PUT("api/PropietarioApi/perfil")
-        Call<ApiResponse<Propietario>> actualizarPerfil(@Header("Authorization") String token, 
-                                                        @Body ActualizarPerfilRequest request);
+        @PUT("api/Propietarios/actualizar")
+        Call<Propietario> actualizarPerfil(@Header("Authorization") String token, 
+                                           @Body Propietario propietario);
 
         @Multipart
         @POST("api/PropietarioApi/perfil/foto")

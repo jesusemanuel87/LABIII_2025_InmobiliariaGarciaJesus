@@ -11,7 +11,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ActualizarPerfilRequest;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Propietario;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Propietarios;
@@ -174,39 +173,30 @@ public class PerfilViewModel extends AndroidViewModel {
             return;
         }
 
-        // Crear el request con los nuevos datos
-        ActualizarPerfilRequest request = new ActualizarPerfilRequest();
-        request.setNombre(nombre.trim());
-        request.setApellido(apellido.trim());
-        request.setTelefono(telefono != null ? telefono.trim() : null);
-        request.setDireccion(propietarioActual.getDireccion());
+        // Actualizar el objeto Propietario con los nuevos datos
+        propietarioActual.setNombre(nombre.trim());
+        propietarioActual.setApellido(apellido.trim());
+        propietarioActual.setTelefono(telefono != null ? telefono.trim() : null);
+        // Email no se actualiza desde aquí, solo desde el backend
 
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<Propietario>> call = api.actualizarPerfil(token, request);
+        Call<Propietario> call = api.actualizarPerfil(token, propietarioActual);
 
-        call.enqueue(new Callback<ApiResponse<Propietario>>() {
+        call.enqueue(new Callback<Propietario>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<Propietario>> call, 
-                                 @NonNull Response<ApiResponse<Propietario>> response) {
+            public void onResponse(@NonNull Call<Propietario> call, 
+                                 @NonNull Response<Propietario> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<Propietario> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Propietario propietarioActualizado = apiResponse.getData();
-                        Log.d("PERFIL", "Perfil actualizado correctamente (REST)");
-                        mPropietario.postValue(propietarioActualizado);
-                        // Guardar en SharedPreferences
-                        ApiClient.guardarPropietario(context, propietarioActualizado);
-                        mModoEdicion.postValue(false);
-                        mTextoBoton.postValue("Editar Perfil");
-                        mIconoBoton.postValue(android.R.drawable.ic_menu_edit);
-                        mFondoCampos.postValue(android.R.color.transparent);
-                        mError.postValue("Perfil actualizado correctamente");
-                    } else {
-                        String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al actualizar el perfil";
-                        Log.d("PERFIL", "Error en respuesta: " + errorMsg);
-                        mError.postValue(errorMsg);
-                    }
+                    Propietario propietarioActualizado = response.body();
+                    Log.d("PERFIL", "Perfil actualizado correctamente");
+                    mPropietario.postValue(propietarioActualizado);
+                    // Guardar en SharedPreferences
+                    ApiClient.guardarPropietario(context, propietarioActualizado);
+                    mModoEdicion.postValue(false);
+                    mTextoBoton.postValue("Editar Perfil");
+                    mIconoBoton.postValue(android.R.drawable.ic_menu_edit);
+                    mFondoCampos.postValue(android.R.color.transparent);
+                    mError.postValue("Perfil actualizado correctamente");
                 } else {
                     Log.d("PERFIL", "Error HTTP: " + response.code());
                     mError.postValue("Error al actualizar el perfil: " + response.code());
@@ -214,7 +204,7 @@ public class PerfilViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<Propietario>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<Propietario> call, @NonNull Throwable t) {
                 Log.d("PERFIL", "Error de conexión: " + t.getMessage());
                 mError.postValue("Error de conexión: " + t.getMessage());
             }

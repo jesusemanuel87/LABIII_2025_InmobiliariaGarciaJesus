@@ -113,6 +113,15 @@ public class PerfilFragment extends Fragment {
             }
         });
 
+        // Listener del botón cambiar contraseña
+        binding.btnCambiarPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CambiarPasswordDialog dialog = new CambiarPasswordDialog();
+                dialog.show(getParentFragmentManager(), "CambiarPasswordDialog");
+            }
+        });
+
         // Cargar datos del perfil
         mv.cargarPerfil();
         

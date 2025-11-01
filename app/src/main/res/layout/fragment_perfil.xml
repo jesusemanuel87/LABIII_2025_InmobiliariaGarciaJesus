@@ -368,6 +368,22 @@
             app:iconGravity="textStart"
             app:iconPadding="8dp" />
 
+        <!-- Botón Cambiar Contraseña -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCambiarPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Cambiar Contraseña"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="16dp"
+            app:cornerRadius="12dp"
+            app:icon="@android:drawable/ic_lock_lock"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
     </LinearLayout>
 
 </ScrollView>
