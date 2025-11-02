@@ -41,14 +41,21 @@ public class CambiarPasswordDialog extends DialogFragment {
 
         builder.setView(view)
                 .setTitle("Cambiar Contraseña")
-                .setPositiveButton("Cambiar", (dialog, id) -> {
-                    cambiarPassword();
-                })
+                .setPositiveButton("Cambiar", null) // Configurar después para evitar auto-close
                 .setNegativeButton("Cancelar", (dialog, id) -> {
                     dismiss();
                 });
 
-        return builder.create();
+        AlertDialog dialog = builder.create();
+        
+        // Configurar el botón positivo después de crear el diálogo para prevenir auto-close
+        dialog.setOnShowListener(dialogInterface -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                cambiarPassword();
+            });
+        });
+
+        return dialog;
     }
 
     private void cambiarPassword() {
@@ -86,8 +93,13 @@ public class CambiarPasswordDialog extends DialogFragment {
 
         if (token == null || token.isEmpty()) {
             Toast.makeText(getContext(), "No hay sesión activa", Toast.LENGTH_SHORT).show();
+            Log.e("CAMBIAR_PASSWORD", "No hay token");
             return;
         }
+
+        Log.d("CAMBIAR_PASSWORD", "Token presente: " + (token.length() > 20 ? token.substring(0, 20) + "..." : token));
+        Log.d("CAMBIAR_PASSWORD", "Password actual length: " + passwordActual.length());
+        Log.d("CAMBIAR_PASSWORD", "Password nueva length: " + passwordNueva.length());
 
         // Mostrar loading
         ProgressDialog progressDialog = new ProgressDialog(getContext());
@@ -99,31 +111,50 @@ public class CambiarPasswordDialog extends DialogFragment {
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(requireContext());
         Call<Void> call = api.cambiarPassword(token, passwordActual, passwordNueva);
 
+        Log.d("CAMBIAR_PASSWORD", "Iniciando cambio de contraseña con PUT /api/Propietarios/changePassword");
+        
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 progressDialog.dismiss();
                 
+                Log.d("CAMBIAR_PASSWORD", "Respuesta recibida - Code: " + response.code());
+                
                 if (response.isSuccessful()) {
+                    Log.d("CAMBIAR_PASSWORD", "Contraseña cambiada exitosamente");
                     Toast.makeText(getContext(), "Contraseña cambiada exitosamente", Toast.LENGTH_LONG).show();
                     dismiss();
                 } else {
+                    // Leer el cuerpo del error
+                    String errorBody = "";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorBody = response.errorBody().string();
+                            Log.e("CAMBIAR_PASSWORD", "Error body: " + errorBody);
+                        }
+                    } catch (Exception e) {
+                        Log.e("CAMBIAR_PASSWORD", "Error al leer error body: " + e.getMessage());
+                    }
+                    
                     String errorMsg = "Error al cambiar contraseña";
                     if (response.code() == 400) {
                         errorMsg = "Contraseña actual incorrecta";
                     } else if (response.code() == 401) {
-                        errorMsg = "Sesión expirada";
+                        errorMsg = "Sesión expirada. Por favor, inicie sesión nuevamente";
+                    } else if (response.code() == 500) {
+                        errorMsg = "Error en el servidor. Intente nuevamente";
                     }
-                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    Log.e("CAMBIAR_PASSWORD", "Error HTTP: " + response.code());
+                    
+                    Toast.makeText(getContext(), errorMsg + " (Código: " + response.code() + ")", Toast.LENGTH_LONG).show();
+                    Log.e("CAMBIAR_PASSWORD", "Error HTTP: " + response.code() + " - " + errorMsg);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 progressDialog.dismiss();
-                Toast.makeText(getContext(), "Error de conexión: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("CAMBIAR_PASSWORD", "Error: " + t.getMessage());
+                Log.e("CAMBIAR_PASSWORD", "Error de conexión: " + t.getMessage(), t);
+                Toast.makeText(getContext(), "Error de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

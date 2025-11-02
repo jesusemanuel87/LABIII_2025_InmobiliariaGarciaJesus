@@ -10,11 +10,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Contrato;
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.InquilinoContrato;
 
 public class DetalleContratoFragment extends Fragment {
 
@@ -29,11 +30,14 @@ public class DetalleContratoFragment extends Fragment {
     private TextView tvImporteAdeudado;
     private Button btnPagos;
     
-    private Contrato contrato;
+    private ContratosViewModel mv;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        // Inicializar ViewModel
+        mv = new ViewModelProvider(this).get(ContratosViewModel.class);
+        
         View root = inflater.inflate(R.layout.fragment_detalle_contrato, container, false);
 
         // Inicializar vistas
@@ -48,63 +52,106 @@ public class DetalleContratoFragment extends Fragment {
         tvImporteAdeudado = root.findViewById(R.id.tvImporteAdeudado);
         btnPagos = root.findViewById(R.id.btnVerPagos);
 
-        // Obtener contrato del bundle
-        if (getArguments() != null) {
-            contrato = (Contrato) getArguments().getSerializable("contrato");
-            if (contrato != null) {
-                cargarDatos();
+        // Observers para cada campo (patrón MVVM puro - sin lógica en la View)
+        mv.getMDireccionInmueble().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String direccion) {
+                tvDireccionInmueble.setText(direccion);
             }
-        }
-
-        // Configurar botón PAGOS
-        btnPagos.setOnClickListener(v -> {
-            if (contrato != null) {
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("contrato", contrato);
-                Navigation.findNavController(root).navigate(R.id.action_detalleContratoFragment_to_detallePagosFragment, bundle);
+        });
+        
+        mv.getMInquilino().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String inquilino) {
+                tvInquilino.setText(inquilino);
+            }
+        });
+        
+        mv.getMPrecio().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String precio) {
+                tvPrecio.setText(precio);
+            }
+        });
+        
+        mv.getMFechaInicio().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String fechaInicio) {
+                tvFechaInicio.setText(fechaInicio);
+            }
+        });
+        
+        mv.getMFechaFin().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String fechaFin) {
+                tvFechaFin.setText(fechaFin);
+            }
+        });
+        
+        mv.getMEstado().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String estado) {
+                tvEstado.setText(estado);
+            }
+        });
+        
+        mv.getMFechaCreacion().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String fechaCreacion) {
+                tvFechaCreacion.setText(fechaCreacion);
+            }
+        });
+        
+        mv.getMMesesAdeudados().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String mesesAdeudados) {
+                tvMesesAdeudados.setText(mesesAdeudados);
+            }
+        });
+        
+        mv.getMMesesAdeudadosVisibility().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer visibility) {
+                tvMesesAdeudados.setVisibility(visibility);
+            }
+        });
+        
+        mv.getMImporteAdeudado().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String importeAdeudado) {
+                tvImporteAdeudado.setText(importeAdeudado);
+            }
+        });
+        
+        mv.getMImporteAdeudadoVisibility().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer visibility) {
+                tvImporteAdeudado.setVisibility(visibility);
+            }
+        });
+        
+        // Observer para configurar el botón de pagos
+        mv.getMContratoSeleccionado().observe(getViewLifecycleOwner(), new Observer<Contrato>() {
+            @Override
+            public void onChanged(Contrato contrato) {
+                if (contrato != null) {
+                    btnPagos.setOnClickListener(v -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("contrato", contrato);
+                        Navigation.findNavController(root).navigate(R.id.action_detalleContratoFragment_to_detallePagosFragment, bundle);
+                    });
+                }
             }
         });
 
+        // Obtener contrato del bundle y establecerlo en el ViewModel
+        if (getArguments() != null) {
+            Contrato contrato = (Contrato) getArguments().getSerializable("contrato");
+            if (contrato != null) {
+                mv.setContratoSeleccionado(contrato);
+            }
+        }
+
         return root;
-    }
-
-    private void cargarDatos() {
-        // Datos del inmueble
-        if (contrato.getInmueble() != null) {
-            tvDireccionInmueble.setText(contrato.getInmueble().getDireccion());
-        } else {
-            tvDireccionInmueble.setText("Inmueble no disponible");
-        }
-
-        // Datos del inquilino
-        if (contrato.getInquilino() != null) {
-            InquilinoContrato inquilino = contrato.getInquilino();
-            tvInquilino.setText(inquilino.getNombreCompleto() != null ? 
-                inquilino.getNombreCompleto() : "No especificado");
-        } else {
-            tvInquilino.setText("Inquilino no disponible");
-        }
-
-        // Datos del contrato
-        tvPrecio.setText(String.format("$ %.2f/mes", contrato.getPrecio()));
-        tvFechaInicio.setText("Inicio: " + (contrato.getFechaInicio() != null ? contrato.getFechaInicio() : "No especificado"));
-        tvFechaFin.setText("Fin: " + (contrato.getFechaFin() != null ? contrato.getFechaFin() : "No especificado"));
-        tvEstado.setText("Estado: " + (contrato.getEstado() != null ? contrato.getEstado() : "No especificado"));
-        tvFechaCreacion.setText("Creado: " + (contrato.getFechaCreacion() != null ? contrato.getFechaCreacion() : "No especificado"));
-        
-        // Información de deuda
-        if (contrato.getMesesAdeudados() != null && contrato.getMesesAdeudados() > 0) {
-            tvMesesAdeudados.setText("Meses adeudados: " + contrato.getMesesAdeudados());
-            tvMesesAdeudados.setVisibility(View.VISIBLE);
-        } else {
-            tvMesesAdeudados.setVisibility(View.GONE);
-        }
-        
-        if (contrato.getImporteAdeudado() != null && contrato.getImporteAdeudado() > 0) {
-            tvImporteAdeudado.setText(String.format("Importe adeudado: $ %.2f", contrato.getImporteAdeudado()));
-            tvImporteAdeudado.setVisibility(View.VISIBLE);
-        } else {
-            tvImporteAdeudado.setVisibility(View.GONE);
-        }
     }
 }

@@ -9,10 +9,15 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import android.view.View;
+
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ActualizarEstadoInmuebleRequest;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.InmuebleImagen;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -23,6 +28,22 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
     private MutableLiveData<Inmueble> mInmueble;
     private MutableLiveData<String> mError;
     private MutableLiveData<Boolean> mActualizando;
+    
+    // LiveData para datos preparados (sin lógica en Fragment)
+    private MutableLiveData<List<InmuebleImagen>> mImagenes;
+    private MutableLiveData<Integer> mIndicadoresVisibility;
+    private MutableLiveData<String> mDireccion;
+    private MutableLiveData<String> mLocalidad;
+    private MutableLiveData<String> mTipo;
+    private MutableLiveData<String> mAmbientes;
+    private MutableLiveData<String> mSuperficie;
+    private MutableLiveData<String> mUso;
+    private MutableLiveData<String> mPrecio;
+    private MutableLiveData<String> mDisponibilidad;
+    private MutableLiveData<Integer> mDisponibilidadColor;
+    private MutableLiveData<String> mEstado;
+    private MutableLiveData<Boolean> mSwitchChecked;
+    private MutableLiveData<Boolean> mSwitchEnabled;
 
     public DetalleInmuebleViewModel(@NonNull Application application) {
         super(application);
@@ -49,6 +70,105 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         }
         return mActualizando;
     }
+    
+    // Getters para datos preparados
+    public LiveData<List<InmuebleImagen>> getMImagenes() {
+        if (mImagenes == null) {
+            mImagenes = new MutableLiveData<>();
+        }
+        return mImagenes;
+    }
+    
+    public LiveData<Integer> getMIndicadoresVisibility() {
+        if (mIndicadoresVisibility == null) {
+            mIndicadoresVisibility = new MutableLiveData<>(View.GONE);
+        }
+        return mIndicadoresVisibility;
+    }
+    
+    public LiveData<String> getMDireccion() {
+        if (mDireccion == null) {
+            mDireccion = new MutableLiveData<>();
+        }
+        return mDireccion;
+    }
+    
+    public LiveData<String> getMLocalidad() {
+        if (mLocalidad == null) {
+            mLocalidad = new MutableLiveData<>();
+        }
+        return mLocalidad;
+    }
+    
+    public LiveData<String> getMTipo() {
+        if (mTipo == null) {
+            mTipo = new MutableLiveData<>();
+        }
+        return mTipo;
+    }
+    
+    public LiveData<String> getMAmbientes() {
+        if (mAmbientes == null) {
+            mAmbientes = new MutableLiveData<>();
+        }
+        return mAmbientes;
+    }
+    
+    public LiveData<String> getMSuperficie() {
+        if (mSuperficie == null) {
+            mSuperficie = new MutableLiveData<>();
+        }
+        return mSuperficie;
+    }
+    
+    public LiveData<String> getMUso() {
+        if (mUso == null) {
+            mUso = new MutableLiveData<>();
+        }
+        return mUso;
+    }
+    
+    public LiveData<String> getMPrecio() {
+        if (mPrecio == null) {
+            mPrecio = new MutableLiveData<>();
+        }
+        return mPrecio;
+    }
+    
+    public LiveData<String> getMDisponibilidad() {
+        if (mDisponibilidad == null) {
+            mDisponibilidad = new MutableLiveData<>();
+        }
+        return mDisponibilidad;
+    }
+    
+    public LiveData<Integer> getMDisponibilidadColor() {
+        if (mDisponibilidadColor == null) {
+            mDisponibilidadColor = new MutableLiveData<>();
+        }
+        return mDisponibilidadColor;
+    }
+    
+    public LiveData<String> getMEstado() {
+        if (mEstado == null) {
+            mEstado = new MutableLiveData<>();
+        }
+        return mEstado;
+    }
+    
+    public LiveData<Boolean> getMSwitchChecked() {
+        if (mSwitchChecked == null) {
+            mSwitchChecked = new MutableLiveData<>(false);
+        }
+        return mSwitchChecked;
+    }
+    
+    public LiveData<Boolean> getMSwitchEnabled() {
+        if (mSwitchEnabled == null) {
+            mSwitchEnabled = new MutableLiveData<>(true);
+        }
+        return mSwitchEnabled;
+    }
 
     public void cargarInmueble(int inmuebleId) {
         String token = ApiClient.getToken(context);
@@ -70,7 +190,9 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
                     ApiResponse<Inmueble> apiResponse = response.body();
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
                         Log.d("DETALLE_INMUEBLE", "Inmueble cargado: " + apiResponse.getData().getId());
-                        mInmueble.postValue(apiResponse.getData());
+                        Inmueble inmueble = apiResponse.getData();
+                        mInmueble.postValue(inmueble);
+                        prepararDatos(inmueble);
                     } else {
                         String errorMsg = apiResponse.getMessage() != null ? 
                             apiResponse.getMessage() : "Error al cargar el inmueble";
@@ -132,6 +254,7 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
                         Log.d("DETALLE_INMUEBLE", "Disponibilidad devuelta: " + inmuebleActualizado.getDisponibilidad());
                         
                         mInmueble.postValue(inmuebleActualizado);
+                        prepararDatos(inmuebleActualizado);
                         mError.postValue("Estado del inmueble actualizado a " + estado);
                     } else {
                         String errorMsg = apiResponse.getMessage() != null ? 
@@ -168,5 +291,72 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         if (call != null && callback != null) {
             call.enqueue(callback);
         }
+    }
+    
+    /**
+     * Prepara todos los datos del inmueble con validaciones y formateo.
+     * TODA la lógica de negocio está aquí.
+     */
+    private void prepararDatos(Inmueble inmueble) {
+        if (inmueble == null) {
+            return;
+        }
+        
+        // Preparar imágenes con validaciones
+        List<InmuebleImagen> imagenes = inmueble.getImagenes();
+        if (imagenes != null && !imagenes.isEmpty()) {
+            Log.d("DETALLE_INMUEBLE", "Cargando " + imagenes.size() + " imágenes en el carrusel");
+            mImagenes.postValue(imagenes);
+            mIndicadoresVisibility.postValue(View.VISIBLE);
+        } else {
+            Log.d("DETALLE_INMUEBLE", "No hay imágenes para mostrar");
+            mIndicadoresVisibility.postValue(View.GONE);
+        }
+        
+        // Preparar datos básicos con formateo
+        mDireccion.postValue(inmueble.getDireccion());
+        mLocalidad.postValue(inmueble.getLocalidad() + ", " + inmueble.getProvincia());
+        mTipo.postValue("Tipo: " + inmueble.getTipoNombre());
+        mAmbientes.postValue("Ambientes: " + inmueble.getAmbientes());
+        
+        // Superficie con validación
+        if (inmueble.getSuperficie() != null) {
+            mSuperficie.postValue(String.format("Superficie: %.2f m²", inmueble.getSuperficie()));
+        } else {
+            mSuperficie.postValue("Superficie: No especificada");
+        }
+        
+        mUso.postValue("Uso: " + inmueble.getUso());
+        
+        // Precio con validación
+        if (inmueble.getPrecio() != null) {
+            mPrecio.postValue(String.format("$ %.2f", inmueble.getPrecio()));
+        }
+        
+        // Disponibilidad con lógica de colores
+        String disponibilidad = inmueble.getDisponibilidad() != null ? inmueble.getDisponibilidad() : "Sin información";
+        mDisponibilidad.postValue(disponibilidad);
+        
+        // Lógica de color según disponibilidad
+        int color;
+        if ("Disponible".equals(disponibilidad)) {
+            color = 0xFF4CAF50; // Verde
+        } else if ("No Disponible".equals(disponibilidad)) {
+            color = 0xFFF44336; // Rojo
+        } else if ("Reservado".equals(disponibilidad)) {
+            color = 0xFFFF9800; // Naranja
+        } else {
+            color = 0xFF9E9E9E; // Gris
+        }
+        mDisponibilidadColor.postValue(color);
+        
+        mEstado.postValue("Estado: " + inmueble.getEstado());
+        
+        // Lógica del switch según estado y disponibilidad
+        boolean esActivo = "Activo".equals(inmueble.getEstado());
+        boolean puedeModificar = "Disponible".equals(disponibilidad);
+        
+        mSwitchChecked.postValue(esActivo);
+        mSwitchEnabled.postValue(puedeModificar);
     }
 }

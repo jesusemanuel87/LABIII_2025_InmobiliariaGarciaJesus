@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,16 +23,18 @@ import java.util.List;
 
 public class DetallePagosFragment extends Fragment {
 
+    private DetallePagosViewModel mv;
     private TextView tvTitulo;
     private TextView tvMensaje;
     private RecyclerView recyclerView;
     private PagosAdapter adapter;
-    
-    private Contrato contrato;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        // Inicializar ViewModel
+        mv = new ViewModelProvider(this).get(DetallePagosViewModel.class);
+        
         View root = inflater.inflate(R.layout.fragment_detalle_pagos, container, false);
 
         // Inicializar vistas
@@ -43,36 +47,48 @@ public class DetallePagosFragment extends Fragment {
         adapter = new PagosAdapter(new ArrayList<>(), getContext());
         recyclerView.setAdapter(adapter);
 
-        // Obtener contrato del bundle
-        if (getArguments() != null) {
-            contrato = (Contrato) getArguments().getSerializable("contrato");
-            if (contrato != null) {
-                cargarPagos();
+        // Observers (patrón MVVM puro - sin lógica en la View)
+        mv.getMTitulo().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String titulo) {
+                tvTitulo.setText(titulo);
             }
+        });
+        
+        mv.getMPagos().observe(getViewLifecycleOwner(), new Observer<List<Pago>>() {
+            @Override
+            public void onChanged(List<Pago> pagos) {
+                adapter.setPagos(pagos);
+            }
+        });
+        
+        mv.getMRecyclerVisibility().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer visibility) {
+                recyclerView.setVisibility(visibility);
+            }
+        });
+        
+        mv.getMMensajeVisibility().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer visibility) {
+                tvMensaje.setVisibility(visibility);
+            }
+        });
+        
+        mv.getMMensajeTexto().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String texto) {
+                tvMensaje.setText(texto);
+            }
+        });
+
+        // Obtener contrato del bundle y pasar al ViewModel
+        if (getArguments() != null) {
+            Contrato contrato = (Contrato) getArguments().getSerializable("contrato");
+            mv.cargarDatosContrato(contrato);
         }
 
         return root;
-    }
-
-    private void cargarPagos() {
-        // Establecer título con dirección del inmueble
-        if (contrato.getInmueble() != null) {
-            tvTitulo.setText("Pagos - " + contrato.getInmueble().getDireccion());
-        } else {
-            tvTitulo.setText("Pagos del Contrato");
-        }
-
-        // Cargar pagos
-        List<Pago> pagos = contrato.getPagos();
-        
-        if (pagos != null && !pagos.isEmpty()) {
-            adapter.setPagos(pagos);
-            recyclerView.setVisibility(View.VISIBLE);
-            tvMensaje.setVisibility(View.GONE);
-        } else {
-            recyclerView.setVisibility(View.GONE);
-            tvMensaje.setVisibility(View.VISIBLE);
-            tvMensaje.setText("No hay pagos registrados para este contrato");
-        }
     }
 }

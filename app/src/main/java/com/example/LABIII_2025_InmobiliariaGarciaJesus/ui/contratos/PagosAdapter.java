@@ -1,6 +1,7 @@
 package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.contratos;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,8 +71,29 @@ public class PagosAdapter extends RecyclerView.Adapter<PagosAdapter.ViewHolder> 
             if (pago.getEstado() != null && !pago.getEstado().isEmpty()) {
                 tvEstado.setText("Estado: " + pago.getEstado());
                 tvEstado.setVisibility(View.VISIBLE);
+                
+                // Aplicar colores según el estado
+                if ("Vencido".equalsIgnoreCase(pago.getEstado())) {
+                    // Vencido: Rojo
+                    tvEstado.setTextColor(Color.RED);
+                    tvImporte.setTextColor(Color.RED);
+                    itemView.setBackgroundColor(Color.parseColor("#FFEBEE")); // Fondo rojo suave
+                } else if ("Pendiente".equalsIgnoreCase(pago.getEstado())) {
+                    // Pendiente: Naranja
+                    tvEstado.setTextColor(Color.parseColor("#FF9800"));
+                    tvImporte.setTextColor(Color.parseColor("#FF9800"));
+                    itemView.setBackgroundColor(Color.parseColor("#FFF3E0")); // Fondo naranja suave
+                } else {
+                    // Pagado u otros: Verde
+                    tvEstado.setTextColor(Color.parseColor("#4CAF50")); // Verde
+                    tvImporte.setTextColor(Color.parseColor("#2196F3")); // Azul para importe
+                    itemView.setBackgroundColor(Color.WHITE); // Fondo blanco
+                }
             } else {
                 tvEstado.setVisibility(View.GONE);
+                // Restaurar colores por defecto si no hay estado
+                tvImporte.setTextColor(Color.parseColor("#2196F3"));
+                itemView.setBackgroundColor(Color.WHITE);
             }
         }
     }

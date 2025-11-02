@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Contrato;
@@ -26,11 +28,14 @@ public class DetalleInquilinoFragment extends Fragment {
     private TextView tvFechaFin;
     private TextView tvEstadoContrato;
     
-    private Contrato contrato;
+    private InquilinosViewModel mv;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        
+        mv = new ViewModelProvider(this).get(InquilinosViewModel.class);
+        
         View root = inflater.inflate(R.layout.fragment_detalle_inquilino, container, false);
 
         // Inicializar vistas
@@ -44,44 +49,78 @@ public class DetalleInquilinoFragment extends Fragment {
         tvFechaFin = root.findViewById(R.id.tvFechaFinDetalle);
         tvEstadoContrato = root.findViewById(R.id.tvEstadoContratoDetalle);
 
-        // Obtener contrato del bundle
+        // Observers para cada campo (patrón MVVM puro - sin lógica en la View)
+        mv.getMNombreCompleto().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String nombre) {
+                tvNombreCompleto.setText(nombre);
+            }
+        });
+        
+        mv.getMDni().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String dni) {
+                tvDni.setText(dni);
+            }
+        });
+        
+        mv.getMEmail().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String email) {
+                tvEmail.setText(email);
+            }
+        });
+        
+        mv.getMTelefono().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String telefono) {
+                tvTelefono.setText(telefono);
+            }
+        });
+        
+        mv.getMDireccionInmueble().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String direccion) {
+                tvDireccionInmueble.setText(direccion);
+            }
+        });
+        
+        mv.getMPrecioAlquiler().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String precio) {
+                tvPrecioAlquiler.setText(precio);
+            }
+        });
+        
+        mv.getMFechaInicio().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String fechaInicio) {
+                tvFechaInicio.setText(fechaInicio);
+            }
+        });
+        
+        mv.getMFechaFin().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String fechaFin) {
+                tvFechaFin.setText(fechaFin);
+            }
+        });
+        
+        mv.getMEstadoContrato().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String estado) {
+                tvEstadoContrato.setText(estado);
+            }
+        });
+
+        // Obtener contrato del bundle y establecerlo en el ViewModel
         if (getArguments() != null) {
-            contrato = (Contrato) getArguments().getSerializable("contrato");
+            Contrato contrato = (Contrato) getArguments().getSerializable("contrato");
             if (contrato != null) {
-                cargarDatos();
+                mv.setContratoSeleccionado(contrato);
             }
         }
 
         return root;
-    }
-
-    private void cargarDatos() {
-        // Datos del inquilino
-        InquilinoContrato inquilino = contrato.getInquilino();
-        if (inquilino != null) {
-            tvNombreCompleto.setText(inquilino.getNombreCompleto() != null ? 
-                inquilino.getNombreCompleto() : "No especificado");
-            tvDni.setText("DNI: " + (inquilino.getDni() != null ? inquilino.getDni() : "No especificado"));
-            tvEmail.setText("Email: " + (inquilino.getEmail() != null ? inquilino.getEmail() : "No especificado"));
-            tvTelefono.setText("Teléfono: " + (inquilino.getTelefono() != null ? inquilino.getTelefono() : "No especificado"));
-        } else {
-            tvNombreCompleto.setText("Inquilino no disponible");
-            tvDni.setText("DNI: No especificado");
-            tvEmail.setText("Email: No especificado");
-            tvTelefono.setText("Teléfono: No especificado");
-        }
-
-        // Datos del inmueble
-        if (contrato.getInmueble() != null) {
-            tvDireccionInmueble.setText(contrato.getInmueble().getDireccion());
-        } else {
-            tvDireccionInmueble.setText("Inmueble no disponible");
-        }
-
-        // Datos del contrato
-        tvPrecioAlquiler.setText(String.format("$ %.2f/mes", contrato.getPrecio()));
-        tvFechaInicio.setText("Inicio: " + (contrato.getFechaInicio() != null ? contrato.getFechaInicio() : "No especificado"));
-        tvFechaFin.setText("Fin: " + (contrato.getFechaFin() != null ? contrato.getFechaFin() : "No especificado"));
-        tvEstadoContrato.setText("Estado: " + (contrato.getEstado() != null ? contrato.getEstado() : "No especificado"));
     }
 }

@@ -44,7 +44,6 @@ public class DetalleInmuebleFragment extends Fragment {
     private Inmueble inmuebleActual;
     private ImagenesCarruselAdapter imagenesAdapter;
     private ImageView[] indicadores;
-    private boolean ignorarCambiosSwitch = false;
 
     public static DetalleInmuebleFragment newInstance(int inmuebleId) {
         DetalleInmuebleFragment fragment = new DetalleInmuebleFragment();
@@ -85,12 +84,11 @@ public class DetalleInmuebleFragment extends Fragment {
         btnVerEnMapa = root.findViewById(R.id.btnVerEnMapa);
         progressBar = root.findViewById(R.id.progressBarDetalle);
         
-        // Observer para el inmueble
+        // Observer para el inmueble (solo para referencia en botón)
         mv.getMInmueble().observe(getViewLifecycleOwner(), new Observer<Inmueble>() {
             @Override
             public void onChanged(Inmueble inmueble) {
                 inmuebleActual = inmueble;
-                mostrarDatosInmueble(inmueble != null ? inmueble : new Inmueble());
             }
         });
         
@@ -131,94 +129,128 @@ public class DetalleInmuebleFragment extends Fragment {
             }
         });
         
-        // Listener del switch - solo llama al ViewModel si no es cambio
-        switchDisponible.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            boolean esActualizacionProgramatica = ignorarCambiosSwitch;
-            ignorarCambiosSwitch = false;
-            
-            String estadoTexto = isChecked ? "Activo" : "Inactivo";
-            mv.cambiarEstadoInmueble(inmuebleId, estadoTexto, esActualizacionProgramatica);
+        // Observer para switch checked (patrón MVVM puro)
+        mv.getMSwitchChecked().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean checked) {
+                switchDisponible.setOnCheckedChangeListener(null);
+                switchDisponible.setChecked(checked);
+                switchDisponible.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    String estadoTexto = isChecked ? "Activo" : "Inactivo";
+                    mv.cambiarEstadoInmueble(inmuebleId, estadoTexto, false);
+                });
+            }
+        });
+        
+        // Observer para switch enabled
+        mv.getMSwitchEnabled().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean enabled) {
+                switchDisponible.setEnabled(enabled);
+            }
         });
         
         // Cargar datos del inmueble
         mv.cargarInmueble(inmuebleId);
         
-        return root;
-    }
-
-    private void mostrarDatosInmueble(Inmueble inmueble) {
-        // Cargar carrusel de imágenes
-        List<InmuebleImagen> imagenes = inmueble.getImagenes();
-        
-        if (imagenes != null && !imagenes.isEmpty()) {
-            Log.d("DETALLE_INMUEBLE", "Cargando " + imagenes.size() + " imágenes en el carrusel");
-            
-            // Configurar adapter del ViewPager2
-            imagenesAdapter = new ImagenesCarruselAdapter(getContext(), imagenes);
-            viewPagerImagenes.setAdapter(imagenesAdapter);
-            
-            // Configurar indicadores
-            configurarIndicadores(imagenes.size());
-            
-            // Listener para cambiar el indicador activo
-            viewPagerImagenes.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-                @Override
-                public void onPageSelected(int position) {
-                    super.onPageSelected(position);
-                    actualizarIndicadores(position);
+        // Observers para datos preparados (patrón MVVM puro - sin lógica en la View)
+        mv.getMImagenes().observe(getViewLifecycleOwner(), new Observer<List<InmuebleImagen>>() {
+            @Override
+            public void onChanged(List<InmuebleImagen> imagenes) {
+                if (imagenes != null && !imagenes.isEmpty()) {
+                    imagenesAdapter = new ImagenesCarruselAdapter(getContext(), imagenes);
+                    viewPagerImagenes.setAdapter(imagenesAdapter);
+                    configurarIndicadores(imagenes.size());
+                    viewPagerImagenes.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                        @Override
+                        public void onPageSelected(int position) {
+                            super.onPageSelected(position);
+                            actualizarIndicadores(position);
+                        }
+                    });
+                    actualizarIndicadores(0);
                 }
-            });
-            
-            // Mostrar el primer indicador como activo
-            actualizarIndicadores(0);
-        } else {
-            Log.d("DETALLE_INMUEBLE", "No hay imágenes para mostrar");
-            // Si no hay imágenes, ocultar indicadores
-            layoutIndicadores.setVisibility(View.GONE);
-        }
+            }
+        });
         
-        // Datos básicos
-        tvDireccion.setText(inmueble.getDireccion());
-        tvLocalidad.setText(inmueble.getLocalidad() + ", " + inmueble.getProvincia());
-        tvTipo.setText("Tipo: " + inmueble.getTipoNombre());
-        tvAmbientes.setText("Ambientes: " + inmueble.getAmbientes());
+        mv.getMIndicadoresVisibility().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer visibility) {
+                layoutIndicadores.setVisibility(visibility);
+            }
+        });
         
-        if (inmueble.getSuperficie() != null) {
-            tvSuperficie.setText(String.format("Superficie: %.2f m²", inmueble.getSuperficie()));
-        } else {
-            tvSuperficie.setText("Superficie: No especificada");
-        }
+        mv.getMDireccion().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String direccion) {
+                tvDireccion.setText(direccion);
+            }
+        });
         
-        tvUso.setText("Uso: " + inmueble.getUso());
+        mv.getMLocalidad().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String localidad) {
+                tvLocalidad.setText(localidad);
+            }
+        });
         
-        if (inmueble.getPrecio() != null) {
-            tvPrecio.setText(String.format("$ %.2f", inmueble.getPrecio()));
-        }
+        mv.getMTipo().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String tipo) {
+                tvTipo.setText(tipo);
+            }
+        });
         
-        // Mostrar disponibilidad con colores
-        String disponibilidad = inmueble.getDisponibilidad() != null ? inmueble.getDisponibilidad() : "Sin información";
-        tvDisponibilidad.setText(disponibilidad);
+        mv.getMAmbientes().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String ambientes) {
+                tvAmbientes.setText(ambientes);
+            }
+        });
         
-        // Cambiar color según disponibilidad
-        if ("Disponible".equals(disponibilidad)) {
-            tvDisponibilidad.setBackgroundColor(0xFF4CAF50); // Verde
-        } else if ("No Disponible".equals(disponibilidad)) {
-            tvDisponibilidad.setBackgroundColor(0xFFF44336); // Rojo
-        } else if ("Reservado".equals(disponibilidad)) {
-            tvDisponibilidad.setBackgroundColor(0xFFFF9800); // Naranja
-        } else {
-            tvDisponibilidad.setBackgroundColor(0xFF9E9E9E); // Gris
-        }
+        mv.getMSuperficie().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String superficie) {
+                tvSuperficie.setText(superficie);
+            }
+        });
         
-        tvEstado.setText("Estado: " + inmueble.getEstado());
+        mv.getMUso().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String uso) {
+                tvUso.setText(uso);
+            }
+        });
         
-        // Configurar switch según el estado y disponibilidad
-        boolean esActivo = "Activo".equals(inmueble.getEstado());
-        boolean puedeModificar = "Disponible".equals(disponibilidad);
+        mv.getMPrecio().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String precio) {
+                tvPrecio.setText(precio);
+            }
+        });
         
-        ignorarCambiosSwitch = true;
-        switchDisponible.setChecked(esActivo);
-        switchDisponible.setEnabled(puedeModificar);
+        mv.getMDisponibilidad().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String disponibilidad) {
+                tvDisponibilidad.setText(disponibilidad);
+            }
+        });
+        
+        mv.getMDisponibilidadColor().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer color) {
+                tvDisponibilidad.setBackgroundColor(color);
+            }
+        });
+        
+        mv.getMEstado().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String estado) {
+                tvEstado.setText(estado);
+            }
+        });
+        
+        return root;
     }
     
     private void configurarIndicadores(int cantidad) {
