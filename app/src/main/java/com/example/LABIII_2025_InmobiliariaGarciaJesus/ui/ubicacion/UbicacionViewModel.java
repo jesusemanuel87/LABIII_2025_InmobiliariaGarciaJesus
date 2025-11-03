@@ -4,7 +4,10 @@ import android.Manifest;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.location.Location;
+import android.util.Log;
 
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -16,6 +19,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
@@ -27,6 +31,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -132,6 +137,9 @@ public class UbicacionViewModel extends AndroidViewModel {
 
         @Override
         public void onMapReady(@NonNull GoogleMap googleMap) {
+            // Detectar modo nocturno y aplicar estilo
+            aplicarEstiloModoNocturno(googleMap);
+            
             MarkerOptions marcador = new MarkerOptions();
             marcador.position(ubicacion);
             marcador.title(titulo);
@@ -148,6 +156,33 @@ public class UbicacionViewModel extends AndroidViewModel {
                     .build();
             CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
             googleMap.animateCamera(cameraUpdate);
+        }
+        
+        private void aplicarEstiloModoNocturno(GoogleMap googleMap) {
+            try {
+                // Verificar si está en modo nocturno
+                int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+                boolean isDarkMode = nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+                
+                if (isDarkMode) {
+                    // Aplicar estilo oscuro
+                    boolean success = googleMap.setMapStyle(
+                            MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_dark)
+                    );
+                    
+                    if (!success) {
+                        Log.e("MAP_STYLE", "Error al aplicar estilo oscuro al mapa");
+                    } else {
+                        Log.d("MAP_STYLE", "Estilo oscuro aplicado correctamente");
+                    }
+                } else {
+                    // Modo claro - usar estilo por defecto
+                    googleMap.setMapStyle(null);
+                    Log.d("MAP_STYLE", "Modo claro - estilo por defecto");
+                }
+            } catch (Resources.NotFoundException e) {
+                Log.e("MAP_STYLE", "No se encontró el archivo de estilo: " + e.getMessage());
+            }
         }
     }
 }

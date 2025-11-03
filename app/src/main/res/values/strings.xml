@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LABIII_2025_InmobiliariaGarciaJesus</string>
+    <string name="app_name">InmobiliariaGJ</string>
     <string name="btLogin">Ingresar</string>
     <string name="edUser">Usuario</string>
     <string name="edPass">Clave</string>

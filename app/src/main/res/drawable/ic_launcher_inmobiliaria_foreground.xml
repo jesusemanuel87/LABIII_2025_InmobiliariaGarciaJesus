@@ -1,0 +1,88 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Edificio principal -->
+    <group
+        android:translateX="28"
+        android:translateY="28">
+        
+        <!-- Base del edificio -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M15,50 L37,50 L37,10 L15,10 Z"/>
+        
+        <!-- Techo -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M12,10 L26,2 L40,10 Z"/>
+        
+        <!-- Ventanas -->
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M18,15 h5 v4 h-5 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M29,15 h5 v4 h-5 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M18,23 h5 v4 h-5 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M29,23 h5 v4 h-5 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M18,31 h5 v4 h-5 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M29,31 h5 v4 h-5 z"/>
+        
+        <!-- Puerta -->
+        <path
+            android:fillColor="#2D2D30"
+            android:pathData="M23,42 h6 v8 h-6 z"/>
+        
+        <!-- Manija de puerta -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M27,46 a1,1 0 1,1 0,2 a1,1 0 1,1 0,-2"/>
+        
+        <!-- Edificio lateral izquierdo -->
+        <path
+            android:fillColor="#E0E0E0"
+            android:pathData="M5,50 L13,50 L13,25 L5,25 Z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M7,28 h3 v3 h-3 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M7,35 h3 v3 h-3 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M7,42 h3 v3 h-3 z"/>
+        
+        <!-- Edificio lateral derecho -->
+        <path
+            android:fillColor="#E0E0E0"
+            android:pathData="M39,50 L47,50 L47,20 L39,20 Z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M41,23 h3 v3 h-3 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M41,30 h3 v3 h-3 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M41,37 h3 v3 h-3 z"/>
+        <path
+            android:fillColor="#007ACC"
+            android:pathData="M41,44 h3 v3 h-3 z"/>
+        
+        <!-- Llave/Key icon (símbolo de inmobiliaria) -->
+        <path
+            android:fillColor="#FFD700"
+            android:pathData="M26,5 a2,2 0 1,1 0,4 a2,2 0 1,1 0,-4 M26,8 v3 h-2 v1 h2 v1"/>
+    </group>
+</vector>

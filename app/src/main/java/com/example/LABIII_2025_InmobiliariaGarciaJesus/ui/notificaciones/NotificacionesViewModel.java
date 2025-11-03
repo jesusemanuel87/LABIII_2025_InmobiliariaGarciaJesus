@@ -29,6 +29,11 @@ public class NotificacionesViewModel extends AndroidViewModel {
     public NotificacionesViewModel(@NonNull Application application) {
         super(application);
         this.context = application.getApplicationContext();
+        // Inicializar LiveData en el constructor
+        mNotificaciones = new MutableLiveData<>();
+        mContador = new MutableLiveData<>(0);
+        mError = new MutableLiveData<>();
+        mCargando = new MutableLiveData<>(false);
     }
 
     public LiveData<List<Notificacion>> getMNotificaciones() {
@@ -132,25 +137,35 @@ public class NotificacionesViewModel extends AndroidViewModel {
         String token = ApiClient.getToken(context);
         boolean tokenValido = token != null && !token.isEmpty();
         
-        ApiClient.MyApiInterface api = tokenValido ? ApiClient.getMyApiInterface(context) : null;
-        Call<ApiResponse<Void>> call = tokenValido && api != null ? 
-            api.marcarNotificacionComoLeida(token, notificacionId) : null;
+        if (!tokenValido) {
+            Log.d("NOTIFICACIONES", "No hay token válido");
+            return;
+        }
+        
+        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
+        Call<ApiResponse<Void>> call = api.marcarNotificacionComoLeida(token, notificacionId);
 
         Callback<ApiResponse<Void>> callback = new Callback<ApiResponse<Void>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<Void>> call,
                                  @NonNull Response<ApiResponse<Void>> response) {
-                boolean exitoso = response.isSuccessful();
-                Log.d("NOTIFICACIONES", exitoso ? "Notificación marcada como leída" : "Error al marcar");
-                
-                // Recargar notificaciones y contador
-                cargarNotificaciones();
-                cargarContadorNoLeidas();
+                if (response.isSuccessful()) {
+                    Log.d("NOTIFICACIONES", "Notificación marcada como leída");
+                    // Recargar notificaciones y contador
+                    cargarNotificaciones();
+                    cargarContadorNoLeidas();
+                } else {
+                    Log.d("NOTIFICACIONES", "Error al marcar: " + response.code());
+                    // NO mostrar error al usuario, solo recargar
+                    cargarNotificaciones();
+                }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 Log.d("NOTIFICACIONES", "Error al marcar como leída: " + t.getMessage());
+                // NO mostrar error al usuario, solo recargar
+                cargarNotificaciones();
             }
         };
         

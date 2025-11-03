@@ -66,7 +66,8 @@ public class NotificacionesAdapter extends RecyclerView.Adapter<NotificacionesAd
         
         // Estilo diferente si no está leída
         holder.tvTitulo.setTypeface(null, esNoLeida ? Typeface.BOLD : Typeface.NORMAL);
-        holder.itemView.setBackgroundColor(esNoLeida ? Color.parseColor("#E3F2FD") : Color.WHITE);
+        // No cambiar el fondo - las cards ya tienen su propio color del tema
+        // holder.itemView.setBackgroundColor(esNoLeida ? Color.parseColor("#E3F2FD") : Color.WHITE);
         
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {

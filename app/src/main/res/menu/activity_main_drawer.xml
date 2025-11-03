@@ -7,31 +7,36 @@
 
         <item
             android:id="@+id/menu_inicio"
-            android:icon="@drawable/ic_map"
+            android:icon="@drawable/ic_menu_location"
             android:title="@string/menu_ubicacion" />
         <item
             android:id="@+id/menu_perfil"
-            android:icon="@drawable/ic_profile"
+            android:icon="@drawable/ic_menu_person"
             android:title="@string/menu_perfil" />
         <item
             android:id="@+id/menu_inmuebles"
-            android:icon="@drawable/ic_home"
+            android:icon="@drawable/ic_menu_building"
             android:title="@string/menu_inmuebles" />
         <item
             android:id="@+id/menu_inquilinos"
-            android:icon="@drawable/ic_people"
+            android:icon="@drawable/ic_menu_people"
             android:title="@string/menu_inquilinos" />
         <item
             android:id="@+id/menu_contratos"
-            android:icon="@drawable/ic_contract"
+            android:icon="@drawable/ic_menu_description"
             android:title="@string/menu_contratos" />
         <item
             android:id="@+id/menu_notificaciones"
-            android:icon="@android:drawable/ic_popup_reminder"
+            android:icon="@drawable/ic_menu_notifications"
             android:title="@string/menu_notificaciones" />
     </group>
-    <item
-        android:id="@+id/menu_salir"
-        android:icon="@drawable/ic_exit"
-        android:title="@string/menu_salir" />
+    
+    <item android:title="Sesión">
+        <menu>
+            <item
+                android:id="@+id/menu_salir"
+                android:icon="@drawable/ic_menu_logout"
+                android:title="@string/menu_salir" />
+        </menu>
+    </item>
 </menu>

@@ -52,4 +52,7 @@
     <color name="text_primary_dark">#E3E3E3</color>
     <color name="text_secondary_dark">#CCCCCC</color>
     <color name="text_hint_dark">#808080</color>
+    
+    <!-- Launcher Icon Background -->
+    <color name="ic_launcher_background">#1976D2</color>
 </resources>

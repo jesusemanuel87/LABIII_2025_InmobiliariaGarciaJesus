@@ -15,16 +15,27 @@
         android:padding="24dp">
 
         <!-- Logo/Icon Section -->
-        <ImageView
-            android:id="@+id/ivLogo"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardLogo"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
             android:layout_marginTop="48dp"
-            android:src="@drawable/login"
-            android:contentDescription="@string/app_name"
+            app:cardCornerRadius="70dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="?attr/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+            
+            <ImageView
+                android:id="@+id/ivLogo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="20dp"
+                android:src="@drawable/ic_launcher_inmobiliaria_foreground"
+                android:contentDescription="@string/app_name"
+                android:scaleType="fitCenter" />
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Welcome Title -->
         <TextView
@@ -39,7 +50,7 @@
             android:letterSpacing="0.02"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivLogo" />
+            app:layout_constraintTop_toBottomOf="@id/cardLogo" />
 
         <!-- Subtitle -->
         <TextView

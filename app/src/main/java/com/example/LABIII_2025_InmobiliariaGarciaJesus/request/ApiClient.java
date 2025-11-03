@@ -219,9 +219,9 @@ public class ApiClient {
         @GET("api/PropietarioApi/perfil")
         Call<ApiResponse<Propietario>> obtenerPerfil(@Header("Authorization") String token);
 
-        @PUT("api/Propietarios/actualizar")
-        Call<Propietario> actualizarPerfil(@Header("Authorization") String token, 
-                                           @Body Propietario propietario);
+        @PUT("api/PropietarioApi/perfil")
+        Call<ApiResponse<Propietario>> actualizarPerfil(@Header("Authorization") String token, 
+                                                        @Body ActualizarPerfilRequest request);
 
         @Multipart
         @POST("api/PropietarioApi/perfil/foto")
