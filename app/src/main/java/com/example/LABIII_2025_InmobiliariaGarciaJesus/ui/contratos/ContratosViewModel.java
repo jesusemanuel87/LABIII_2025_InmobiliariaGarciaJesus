@@ -11,7 +11,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import android.view.View;
 
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Contrato;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.InquilinoContrato;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
@@ -248,24 +247,17 @@ public class ContratosViewModel extends AndroidViewModel {
         }
 
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<List<Contrato>>> call = api.listarContratos(token);
+        Call<List<Contrato>> call = api.listarContratos(token);
 
-        call.enqueue(new Callback<ApiResponse<List<Contrato>>>() {
+        call.enqueue(new Callback<List<Contrato>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<Contrato>>> call,
-                                 @NonNull Response<ApiResponse<List<Contrato>>> response) {
+            public void onResponse(@NonNull Call<List<Contrato>> call,
+                                 @NonNull Response<List<Contrato>> response) {
                 mCargando.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<Contrato>> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Log.d("CONTRATOS", "Contratos cargados: " + apiResponse.getData().size());
-                        mContratos.postValue(apiResponse.getData());
-                    } else {
-                        String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al cargar contratos";
-                        Log.d("CONTRATOS", "Error en respuesta: " + errorMsg);
-                        mError.postValue(errorMsg);
-                    }
+                    List<Contrato> contratos = response.body();
+                    Log.d("CONTRATOS", "Contratos cargados: " + contratos.size());
+                    mContratos.postValue(contratos);
                 } else {
                     Log.d("CONTRATOS", "Error HTTP: " + response.code());
                     mError.postValue("Error al cargar contratos: " + response.code());
@@ -273,7 +265,7 @@ public class ContratosViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<Contrato>>> call, 
+            public void onFailure(@NonNull Call<List<Contrato>> call, 
                                 @NonNull Throwable t) {
                 mCargando.postValue(false);
                 Log.d("CONTRATOS", "Error de conexión: " + t.getMessage());
@@ -293,24 +285,17 @@ public class ContratosViewModel extends AndroidViewModel {
         }
 
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<List<Contrato>>> call = api.listarContratosPorInmueble(token, inmuebleId);
+        Call<List<Contrato>> call = api.listarContratosPorInmueble(token, inmuebleId);
 
-        call.enqueue(new Callback<ApiResponse<List<Contrato>>>() {
+        call.enqueue(new Callback<List<Contrato>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<Contrato>>> call,
-                                 @NonNull Response<ApiResponse<List<Contrato>>> response) {
+            public void onResponse(@NonNull Call<List<Contrato>> call,
+                                 @NonNull Response<List<Contrato>> response) {
                 mCargando.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<Contrato>> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Log.d("CONTRATOS", "Contratos del inmueble cargados: " + apiResponse.getData().size());
-                        mContratos.postValue(apiResponse.getData());
-                    } else {
-                        String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al cargar contratos del inmueble";
-                        Log.d("CONTRATOS", "Error en respuesta: " + errorMsg);
-                        mError.postValue(errorMsg);
-                    }
+                    List<Contrato> contratos = response.body();
+                    Log.d("CONTRATOS", "Contratos del inmueble cargados: " + contratos.size());
+                    mContratos.postValue(contratos);
                 } else {
                     Log.d("CONTRATOS", "Error HTTP: " + response.code());
                     mError.postValue("Error al cargar contratos: " + response.code());
@@ -318,7 +303,7 @@ public class ContratosViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<Contrato>>> call, 
+            public void onFailure(@NonNull Call<List<Contrato>> call, 
                                 @NonNull Throwable t) {
                 mCargando.postValue(false);
                 Log.d("CONTRATOS", "Error de conexión: " + t.getMessage());

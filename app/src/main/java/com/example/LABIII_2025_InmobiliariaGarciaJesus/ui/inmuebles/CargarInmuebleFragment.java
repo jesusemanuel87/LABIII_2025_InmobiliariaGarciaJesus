@@ -12,10 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.List;
@@ -27,26 +23,20 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
+import com.example.LABIII_2025_InmobiliariaGarciaJesus.databinding.FragmentCargarInmuebleBinding;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Localidad;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Provincia;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.TipoInmueble;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.textfield.TextInputEditText;
 
 import android.widget.AdapterView;
 
 public class CargarInmuebleFragment extends Fragment {
 
+    private FragmentCargarInmuebleBinding binding;
     private CargarInmuebleViewModel mv;
-    private TextInputEditText etDireccion, etAmbientes;
-    private TextInputEditText etSuperficie, etPrecio, etLatitud, etLongitud;
-    private Spinner spinnerProvincia, spinnerLocalidad, spinnerTipo, spinnerUso;
-    private Button btnGuardar, btnObtenerUbicacion, btnSeleccionarImagen;
-    private ImageView ivPreviewImagen;
-    private ProgressBar progressBar;
     private FusedLocationProviderClient fusedLocationClient;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
@@ -58,37 +48,21 @@ public class CargarInmuebleFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_cargar_inmueble, container, false);
+        binding = FragmentCargarInmuebleBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
 
         mv = new ViewModelProvider(this).get(CargarInmuebleViewModel.class);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
-
-        // Inicializar vistas
-        etDireccion = root.findViewById(R.id.etDireccion);
-        etAmbientes = root.findViewById(R.id.etAmbientes);
-        etSuperficie = root.findViewById(R.id.etSuperficie);
-        etPrecio = root.findViewById(R.id.etPrecio);
-        etLatitud = root.findViewById(R.id.etLatitud);
-        etLongitud = root.findViewById(R.id.etLongitud);
-        spinnerProvincia = root.findViewById(R.id.spinnerProvincia);
-        spinnerLocalidad = root.findViewById(R.id.spinnerLocalidad);
-        spinnerTipo = root.findViewById(R.id.spinnerTipo);
-        spinnerUso = root.findViewById(R.id.spinnerUso);
-        btnGuardar = root.findViewById(R.id.btnGuardar);
-        btnObtenerUbicacion = root.findViewById(R.id.btnObtenerUbicacion);
-        btnSeleccionarImagen = root.findViewById(R.id.btnSeleccionarImagen);
-        ivPreviewImagen = root.findViewById(R.id.ivPreviewImagen);
-        progressBar = root.findViewById(R.id.progressBarCargar);
 
         // Configurar Spinner de Uso (hardcodeado)
         String[] usos = {"Residencial", "Comercial", "Industrial"};
         ArrayAdapter<String> adapterUso = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item, usos);
         adapterUso.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerUso.setAdapter(adapterUso);
+        binding.spinnerUso.setAdapter(adapterUso);
         
         // Listener para cambio de Provincia - cargar localidades
-        spinnerProvincia.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        binding.spinnerProvincia.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Provincia provinciaSeleccionada = (Provincia) parent.getItemAtPosition(position);
@@ -103,28 +77,13 @@ public class CargarInmuebleFragment extends Fragment {
         });
 
         // Listener del botón obtener ubicación
-        btnObtenerUbicacion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                obtenerUbicacionActual();
-            }
-        });
+        binding.btnObtenerUbicacion.setOnClickListener(v -> obtenerUbicacionActual());
         
         // Listener del botón seleccionar imagen
-        btnSeleccionarImagen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                abrirGaleria();
-            }
-        });
+        binding.btnSeleccionarImagen.setOnClickListener(v -> abrirGaleria());
 
         // Listener del botón guardar
-        btnGuardar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                guardarInmueble();
-            }
-        });
+        binding.btnGuardar.setOnClickListener(v -> guardarInmueble());
 
         // Observer para mensajes
         mv.getMMensaje().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -139,8 +98,8 @@ public class CargarInmuebleFragment extends Fragment {
             @Override
             public void onChanged(Boolean cargando) {
                 boolean isLoading = Boolean.TRUE.equals(cargando);
-                progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-                btnGuardar.setEnabled(!isLoading);
+                binding.progressBarCargar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                binding.btnGuardar.setEnabled(!isLoading);
             }
         });
 
@@ -163,12 +122,12 @@ public class CargarInmuebleFragment extends Fragment {
                     ArrayAdapter<Provincia> adapter = new ArrayAdapter<>(getContext(),
                             android.R.layout.simple_spinner_item, provincias);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    spinnerProvincia.setAdapter(adapter);
+                    binding.spinnerProvincia.setAdapter(adapter);
                     
                     // Seleccionar "San Luis" por defecto
                     for (int i = 0; i < provincias.size(); i++) {
                         if (provincias.get(i).getNombre().equalsIgnoreCase("San Luis")) {
-                            spinnerProvincia.setSelection(i);
+                            binding.spinnerProvincia.setSelection(i);
                             break;
                         }
                     }
@@ -184,12 +143,12 @@ public class CargarInmuebleFragment extends Fragment {
                     ArrayAdapter<Localidad> adapter = new ArrayAdapter<>(getContext(),
                             android.R.layout.simple_spinner_item, localidades);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    spinnerLocalidad.setAdapter(adapter);
+                    binding.spinnerLocalidad.setAdapter(adapter);
                     
                     // Seleccionar "San Luis" por defecto
                     for (int i = 0; i < localidades.size(); i++) {
                         if (localidades.get(i).getNombre().equalsIgnoreCase("San Luis")) {
-                            spinnerLocalidad.setSelection(i);
+                            binding.spinnerLocalidad.setSelection(i);
                             break;
                         }
                     }
@@ -205,7 +164,7 @@ public class CargarInmuebleFragment extends Fragment {
                     ArrayAdapter<TipoInmueble> adapter = new ArrayAdapter<>(getContext(),
                             android.R.layout.simple_spinner_item, tipos);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    spinnerTipo.setAdapter(adapter);
+                    binding.spinnerTipo.setAdapter(adapter);
                 }
             }
         });
@@ -231,8 +190,8 @@ public class CargarInmuebleFragment extends Fragment {
                     @Override
                     public void onSuccess(Location location) {
                         if (location != null) {
-                            etLatitud.setText(String.valueOf(location.getLatitude()));
-                            etLongitud.setText(String.valueOf(location.getLongitude()));
+                            binding.etLatitud.setText(String.valueOf(location.getLatitude()));
+                            binding.etLongitud.setText(String.valueOf(location.getLongitude()));
                             Toast.makeText(getContext(), "Ubicación obtenida", 
                                          Toast.LENGTH_SHORT).show();
                         } else {
@@ -260,19 +219,19 @@ public class CargarInmuebleFragment extends Fragment {
     }
 
     private void guardarInmueble() {
-        // Obtener datos simples de TextInputs
-        String direccion = etDireccion.getText() != null ? etDireccion.getText().toString() : "";
-        String ambientes = etAmbientes.getText() != null ? etAmbientes.getText().toString() : "";
-        String superficie = etSuperficie.getText() != null ? etSuperficie.getText().toString() : "";
-        String precio = etPrecio.getText() != null ? etPrecio.getText().toString() : "";
-        String latitud = etLatitud.getText() != null ? etLatitud.getText().toString() : "";
-        String longitud = etLongitud.getText() != null ? etLongitud.getText().toString() : "";
+        // Obtener valores de campos - el ViewModel hará todas las validaciones
+        String direccion = binding.etDireccion.getText() != null ? binding.etDireccion.getText().toString() : "";
+        String ambientes = binding.etAmbientes.getText() != null ? binding.etAmbientes.getText().toString() : "";
+        String superficie = binding.etSuperficie.getText() != null ? binding.etSuperficie.getText().toString() : "";
+        String precio = binding.etPrecio.getText() != null ? binding.etPrecio.getText().toString() : "";
+        String latitud = binding.etLatitud.getText() != null ? binding.etLatitud.getText().toString() : "";
+        String longitud = binding.etLongitud.getText() != null ? binding.etLongitud.getText().toString() : "";
         
         // Obtener objetos completos de los spinners (sin lógica)
-        Provincia provincia = (Provincia) spinnerProvincia.getSelectedItem();
-        Localidad localidad = (Localidad) spinnerLocalidad.getSelectedItem();
-        TipoInmueble tipo = (TipoInmueble) spinnerTipo.getSelectedItem();
-        int uso = spinnerUso.getSelectedItemPosition();
+        Provincia provincia = (Provincia) binding.spinnerProvincia.getSelectedItem();
+        Localidad localidad = (Localidad) binding.spinnerLocalidad.getSelectedItem();
+        TipoInmueble tipo = (TipoInmueble) binding.spinnerTipo.getSelectedItem();
+        int uso = binding.spinnerUso.getSelectedItemPosition();
         
         // El ViewModel valida y procesa todo
         mv.crearInmueble(direccion, localidad, provincia, tipo, ambientes, 
@@ -305,13 +264,19 @@ public class CargarInmuebleFragment extends Fragment {
                 imagenBase64 = mv.bitmapABase64(bitmapRedimensionado);
                 
                 // Mostrar preview
-                ivPreviewImagen.setImageBitmap(bitmapRedimensionado);
-                ivPreviewImagen.setVisibility(View.VISIBLE);
-                btnSeleccionarImagen.setText("Cambiar Foto");
+                binding.ivPreviewImagen.setImageBitmap(bitmapRedimensionado);
+                binding.ivPreviewImagen.setVisibility(View.VISIBLE);
+                binding.btnSeleccionarImagen.setText("Cambiar Foto");
                 
                 Toast.makeText(getContext(), "Imagen seleccionada: " + imagenNombre, 
                              Toast.LENGTH_SHORT).show();
             }
         }
+    }
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

@@ -10,7 +10,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ActualizarEstadoInmuebleRequest;
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
 
@@ -64,32 +63,24 @@ public class InmueblesViewModel extends AndroidViewModel {
         }
 
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<List<Inmueble>>> call = api.listarInmuebles(token);
+        Call<List<Inmueble>> call = api.listarInmuebles(token);
 
-        call.enqueue(new Callback<ApiResponse<List<Inmueble>>>() {
+        call.enqueue(new Callback<List<Inmueble>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<Inmueble>>> call,
-                                 @NonNull Response<ApiResponse<List<Inmueble>>> response) {
+            public void onResponse(@NonNull Call<List<Inmueble>> call,
+                                 @NonNull Response<List<Inmueble>> response) {
                 mCargando.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<Inmueble>> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        List<Inmueble> inmuebles = apiResponse.getData();
-                        Log.d("INMUEBLES", "Inmuebles cargados: " + inmuebles.size());
-                        
-                        // Log de las URLs de imágenes para debug
-                        for (Inmueble inmueble : inmuebles) {
-                            Log.d("INMUEBLES", "Inmueble ID " + inmueble.getId() + 
-                                  " - imagenPortadaUrl: " + inmueble.getImagenPortadaUrl());
-                        }
-                        
-                        mInmuebles.postValue(inmuebles);
-                    } else {
-                        String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al cargar inmuebles";
-                        Log.d("INMUEBLES", "Error en respuesta: " + errorMsg);
-                        mError.postValue(errorMsg);
+                    List<Inmueble> inmuebles = response.body();
+                    Log.d("INMUEBLES", "Inmuebles cargados: " + inmuebles.size());
+                    
+                    // Log de las URLs de imágenes para debug
+                    for (Inmueble inmueble : inmuebles) {
+                        Log.d("INMUEBLES", "Inmueble ID " + inmueble.getId() + 
+                              " - imagenPortadaUrl: " + inmueble.getImagenPortadaUrl());
                     }
+                    
+                    mInmuebles.postValue(inmuebles);
                 } else {
                     Log.d("INMUEBLES", "Error HTTP: " + response.code());
                     mError.postValue("Error al cargar inmuebles: " + response.code());
@@ -97,7 +88,7 @@ public class InmueblesViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<Inmueble>>> call, 
+            public void onFailure(@NonNull Call<List<Inmueble>> call, 
                                 @NonNull Throwable t) {
                 mCargando.postValue(false);
                 Log.d("INMUEBLES", "Error de conexión: " + t.getMessage());
@@ -118,25 +109,17 @@ public class InmueblesViewModel extends AndroidViewModel {
         
         ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(estado);
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<Inmueble>> call = api.actualizarEstadoInmueble(token, inmuebleId, request);
+        Call<Inmueble> call = api.actualizarEstadoInmueble(token, inmuebleId, request);
 
-        call.enqueue(new Callback<ApiResponse<Inmueble>>() {
+        call.enqueue(new Callback<Inmueble>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<Inmueble>> call,
-                                 @NonNull Response<ApiResponse<Inmueble>> response) {
+            public void onResponse(@NonNull Call<Inmueble> call,
+                                 @NonNull Response<Inmueble> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<Inmueble> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Log.d("INMUEBLES", "Estado actualizado correctamente");
-                        mError.postValue("Estado del inmueble actualizado a " + estado);
-                        // Recargar la lista completa
-                        cargarInmuebles();
-                    } else {
-                        String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al actualizar el estado";
-                        Log.d("INMUEBLES", "Error en respuesta: " + errorMsg);
-                        mError.postValue(errorMsg);
-                    }
+                    Log.d("INMUEBLES", "Estado actualizado correctamente");
+                    mError.postValue("Estado del inmueble actualizado a " + estado);
+                    // Recargar la lista completa
+                    cargarInmuebles();
                 } else {
                     Log.d("INMUEBLES", "Error HTTP: " + response.code());
                     mError.postValue("Error al actualizar el estado: " + response.code());
@@ -144,7 +127,7 @@ public class InmueblesViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<Inmueble>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<Inmueble> call, @NonNull Throwable t) {
                 Log.d("INMUEBLES", "Error de conexión: " + t.getMessage());
                 mError.postValue("Error de conexión: " + t.getMessage());
             }

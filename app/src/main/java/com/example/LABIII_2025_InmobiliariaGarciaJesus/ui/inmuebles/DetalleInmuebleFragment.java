@@ -160,15 +160,34 @@ public class DetalleInmuebleFragment extends Fragment {
                 if (imagenes != null && !imagenes.isEmpty()) {
                     imagenesAdapter = new ImagenesCarruselAdapter(getContext(), imagenes);
                     viewPagerImagenes.setAdapter(imagenesAdapter);
-                    configurarIndicadores(imagenes.size());
                     viewPagerImagenes.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
                         @Override
                         public void onPageSelected(int position) {
                             super.onPageSelected(position);
-                            actualizarIndicadores(position);
+                            // Delegar al ViewModel
+                            mv.actualizarPosicionCarrusel(position);
                         }
                     });
-                    actualizarIndicadores(0);
+                }
+            }
+        });
+        
+        // Observer para cantidad de indicadores - configura la UI
+        mv.getMCantidadIndicadores().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer cantidad) {
+                if (cantidad != null && cantidad > 0) {
+                    configurarIndicadores(cantidad);
+                }
+            }
+        });
+        
+        // Observer para indicador activo - actualiza la UI sin lógica
+        mv.getMIndicadorActivo().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer posicion) {
+                if (posicion != null) {
+                    actualizarIndicadores(posicion);
                 }
             }
         });
@@ -253,6 +272,9 @@ public class DetalleInmuebleFragment extends Fragment {
         return root;
     }
     
+    /**
+     * Configura la UI de los indicadores. Solo crea las vistas, sin lógica de negocio.
+     */
     private void configurarIndicadores(int cantidad) {
         layoutIndicadores.removeAllViews();
         indicadores = new ImageView[cantidad];
@@ -273,6 +295,10 @@ public class DetalleInmuebleFragment extends Fragment {
         layoutIndicadores.setVisibility(View.VISIBLE);
     }
     
+    /**
+     * Actualiza la UI de los indicadores basándose en la posición.
+     * Solo actualiza vistas, sin lógica de negocio.
+     */
     private void actualizarIndicadores(int posicionActual) {
         if (indicadores == null) return;
         

@@ -184,7 +184,7 @@ public class ApiClient {
     public interface MyApiInterface{
         // === AUTENTICACIÓN (AuthApi) ===
         @POST("api/AuthApi/login")
-        Call<ApiResponse<LoginResponse>> login(@Body LoginRequest loginRequest);
+        Call<LoginResponse> login(@Body LoginRequest loginRequest);
 
         @FormUrlEncoded
         @PUT("api/Propietarios/changePassword")
@@ -193,81 +193,81 @@ public class ApiClient {
                                    @Field("newPassword") String newPassword);
 
         @POST("api/AuthApi/reset-password")
-        Call<ApiResponse<ResetPasswordResponse>> resetPassword(@Body ResetPasswordRequest request);
+        Call<ResetPasswordResponse> resetPassword(@Body ResetPasswordRequest request);
 
         // === PROPIETARIO (PropietarioApi) ===
         @GET("api/PropietarioApi/perfil")
-        Call<ApiResponse<Propietario>> obtenerPerfil(@Header("Authorization") String token);
+        Call<Propietario> obtenerPerfil(@Header("Authorization") String token);
 
         @PUT("api/PropietarioApi/perfil")
-        Call<ApiResponse<Propietario>> actualizarPerfil(@Header("Authorization") String token, 
+        Call<Propietario> actualizarPerfil(@Header("Authorization") String token, 
                                                         @Body ActualizarPerfilRequest request);
 
         @Multipart
         @POST("api/PropietarioApi/perfil/foto")
-        Call<ApiResponse<Propietario>> subirFotoPerfil(@Header("Authorization") String token, 
+        Call<Propietario> subirFotoPerfil(@Header("Authorization") String token, 
                                                        @Part MultipartBody.Part foto);
 
         // === INMUEBLES (InmueblesApi) ===
         @GET("api/InmueblesApi")
-        Call<ApiResponse<List<Inmueble>>> listarInmuebles(@Header("Authorization") String token);
+        Call<List<Inmueble>> listarInmuebles(@Header("Authorization") String token);
 
         @GET("api/InmueblesApi/{id}")
-        Call<ApiResponse<Inmueble>> obtenerInmueble(@Header("Authorization") String token, 
+        Call<Inmueble> obtenerInmueble(@Header("Authorization") String token, 
                                                     @Path("id") int inmuebleId);
 
         @POST("api/InmueblesApi")
-        Call<ApiResponse<Inmueble>> crearInmueble(@Header("Authorization") String token, 
+        Call<Inmueble> crearInmueble(@Header("Authorization") String token, 
                                                   @Body CrearInmuebleRequest request);
 
         @PATCH("api/InmueblesApi/{id}/estado")
-        Call<ApiResponse<Inmueble>> actualizarEstadoInmueble(@Header("Authorization") String token, 
+        Call<Inmueble> actualizarEstadoInmueble(@Header("Authorization") String token, 
                                                              @Path("id") int inmuebleId, 
                                                              @Body ActualizarEstadoInmuebleRequest request);
 
         // === CONTRATOS (ContratosApi) ===
         @GET("api/ContratosApi")
-        Call<ApiResponse<List<Contrato>>> listarContratos(@Header("Authorization") String token);
+        Call<List<Contrato>> listarContratos(@Header("Authorization") String token);
 
         @GET("api/ContratosApi/{id}")
-        Call<ApiResponse<Contrato>> obtenerContrato(@Header("Authorization") String token, 
+        Call<Contrato> obtenerContrato(@Header("Authorization") String token, 
                                                     @Path("id") int contratoId);
 
         @GET("api/ContratosApi/inmueble/{inmuebleId}")
-        Call<ApiResponse<List<Contrato>>> listarContratosPorInmueble(@Header("Authorization") String token, 
+        Call<List<Contrato>> listarContratosPorInmueble(@Header("Authorization") String token, 
                                                                      @Path("inmuebleId") int inmuebleId);
         
         // === GEOREF API (Provincias y Localidades) ===
         @GET("api/GeorefApi/provincias")
-        Call<ApiResponse<List<Provincia>>> listarProvincias(@Header("Authorization") String token);
+        Call<List<Provincia>> listarProvincias(@Header("Authorization") String token);
         
         @GET("api/GeorefApi/localidades/{provincia}")
-        Call<ApiResponse<List<Localidad>>> listarLocalidadesPorProvincia(@Header("Authorization") String token,
+        Call<List<Localidad>> listarLocalidadesPorProvincia(@Header("Authorization") String token,
                                                                          @Path("provincia") String provincia);
         
         // === TIPOS DE INMUEBLE API ===
         @GET("api/TiposInmuebleApi")
-        Call<ApiResponse<List<TipoInmueble>>> listarTiposInmueble(@Header("Authorization") String token);
+        Call<List<TipoInmueble>> listarTiposInmueble(@Header("Authorization") String token);
         
         // === NOTIFICACIONES API ===
         @GET("api/NotificacionesApi")
-        Call<ApiResponse<List<Notificacion>>> listarNotificaciones(@Header("Authorization") String token);
+        Call<List<Notificacion>> listarNotificaciones(@Header("Authorization") String token);
         
         @GET("api/NotificacionesApi/no-leidas")
-        Call<ApiResponse<List<Notificacion>>> listarNotificacionesNoLeidas(@Header("Authorization") String token);
+        Call<List<Notificacion>> listarNotificacionesNoLeidas(@Header("Authorization") String token);
         
         @GET("api/NotificacionesApi/contador")
-        Call<ApiResponse<Integer>> obtenerContadorNoLeidas(@Header("Authorization") String token);
+        Call<Integer> obtenerContadorNoLeidas(@Header("Authorization") String token);
         
         @PATCH("api/NotificacionesApi/{id}/marcar-leida")
-        Call<ApiResponse<Void>> marcarNotificacionComoLeida(@Header("Authorization") String token,
+        Call<Void> marcarNotificacionComoLeida(@Header("Authorization") String token,
                                                             @Path("id") int notificacionId);
         
         @PATCH("api/NotificacionesApi/marcar-todas-leidas")
-        Call<ApiResponse<String>> marcarTodasLasNotificacionesComoLeidas(@Header("Authorization") String token);
+        Call<String> marcarTodasLasNotificacionesComoLeidas(@Header("Authorization") String token);
         
         @HTTP(method = "DELETE", path = "api/NotificacionesApi/{id}", hasBody = false)
-        Call<ApiResponse<Void>> eliminarNotificacion(@Header("Authorization") String token,
+        Call<Void> eliminarNotificacion(@Header("Authorization") String token,
                                                      @Path("id") int notificacionId);
     }
 }

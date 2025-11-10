@@ -9,7 +9,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Notificacion;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
 
@@ -72,27 +71,28 @@ public class NotificacionesViewModel extends AndroidViewModel {
         mCargando.postValue(tokenValido);
 
         ApiClient.MyApiInterface api = tokenValido ? ApiClient.getMyApiInterface(context) : null;
-        Call<ApiResponse<List<Notificacion>>> call = tokenValido && api != null ? 
+        Call<List<Notificacion>> call = tokenValido && api != null ? 
             api.listarNotificaciones(token) : null;
 
-        Callback<ApiResponse<List<Notificacion>>> callback = new Callback<ApiResponse<List<Notificacion>>>() {
+        Callback<List<Notificacion>> callback = new Callback<List<Notificacion>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<Notificacion>>> call,
-                                 @NonNull Response<ApiResponse<List<Notificacion>>> response) {
+            public void onResponse(@NonNull Call<List<Notificacion>> call,
+                                 @NonNull Response<List<Notificacion>> response) {
                 mCargando.postValue(false);
                 
-                boolean exitoso = response.isSuccessful() && response.body() != null;
-                ApiResponse<List<Notificacion>> apiResponse = exitoso ? response.body() : null;
-                boolean tieneData = apiResponse != null && apiResponse.isSuccess() && apiResponse.getData() != null;
-                
-                mNotificaciones.postValue(tieneData ? apiResponse.getData() : java.util.Collections.emptyList());
-                mError.postValue(!tieneData && exitoso ? apiResponse.getMessage() : !exitoso ? "Error al cargar notificaciones" : "");
-                
-                Log.d("NOTIFICACIONES", tieneData ? "Notificaciones cargadas: " + apiResponse.getData().size() : "Sin notificaciones");
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Notificacion> notificaciones = response.body();
+                    mNotificaciones.postValue(notificaciones);
+                    Log.d("NOTIFICACIONES", "Notificaciones cargadas: " + notificaciones.size());
+                } else {
+                    mNotificaciones.postValue(java.util.Collections.emptyList());
+                    mError.postValue("Error al cargar notificaciones");
+                    Log.d("NOTIFICACIONES", "Error HTTP: " + response.code());
+                }
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<Notificacion>>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<List<Notificacion>> call, @NonNull Throwable t) {
                 mCargando.postValue(false);
                 mError.postValue("Error de conexión: " + t.getMessage());
                 mNotificaciones.postValue(java.util.Collections.emptyList());
@@ -108,23 +108,25 @@ public class NotificacionesViewModel extends AndroidViewModel {
         boolean tokenValido = token != null && !token.isEmpty();
         
         ApiClient.MyApiInterface api = tokenValido ? ApiClient.getMyApiInterface(context) : null;
-        Call<ApiResponse<Integer>> call = tokenValido && api != null ? 
+        Call<Integer> call = tokenValido && api != null ? 
             api.obtenerContadorNoLeidas(token) : null;
 
-        Callback<ApiResponse<Integer>> callback = new Callback<ApiResponse<Integer>>() {
+        Callback<Integer> callback = new Callback<Integer>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<Integer>> call,
-                                 @NonNull Response<ApiResponse<Integer>> response) {
-                boolean exitoso = response.isSuccessful() && response.body() != null;
-                ApiResponse<Integer> apiResponse = exitoso ? response.body() : null;
-                boolean tieneData = apiResponse != null && apiResponse.isSuccess() && apiResponse.getData() != null;
-                
-                mContador.postValue(tieneData ? apiResponse.getData() : 0);
-                Log.d("NOTIFICACIONES", tieneData ? "Contador actualizado: " + apiResponse.getData() : "Contador: 0");
+            public void onResponse(@NonNull Call<Integer> call,
+                                 @NonNull Response<Integer> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Integer contador = response.body();
+                    mContador.postValue(contador);
+                    Log.d("NOTIFICACIONES", "Contador actualizado: " + contador);
+                } else {
+                    mContador.postValue(0);
+                    Log.d("NOTIFICACIONES", "Contador: 0");
+                }
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<Integer>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<Integer> call, @NonNull Throwable t) {
                 mContador.postValue(0);
                 Log.d("NOTIFICACIONES", "Error al cargar contador: " + t.getMessage());
             }
@@ -143,12 +145,12 @@ public class NotificacionesViewModel extends AndroidViewModel {
         }
         
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<Void>> call = api.marcarNotificacionComoLeida(token, notificacionId);
+        Call<Void> call = api.marcarNotificacionComoLeida(token, notificacionId);
 
-        Callback<ApiResponse<Void>> callback = new Callback<ApiResponse<Void>>() {
+        Callback<Void> callback = new Callback<Void>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<Void>> call,
-                                 @NonNull Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<Void> call,
+                                 @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
                     Log.d("NOTIFICACIONES", "Notificación marcada como leída");
                     // Recargar notificaciones y contador
@@ -162,7 +164,7 @@ public class NotificacionesViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 Log.d("NOTIFICACIONES", "Error al marcar como leída: " + t.getMessage());
                 // NO mostrar error al usuario, solo recargar
                 cargarNotificaciones();
@@ -179,18 +181,20 @@ public class NotificacionesViewModel extends AndroidViewModel {
         mError.postValue(!tokenValido ? "No hay sesión activa" : "");
         
         ApiClient.MyApiInterface api = tokenValido ? ApiClient.getMyApiInterface(context) : null;
-        Call<ApiResponse<String>> call = tokenValido && api != null ? 
+        Call<String> call = tokenValido && api != null ? 
             api.marcarTodasLasNotificacionesComoLeidas(token) : null;
 
-        Callback<ApiResponse<String>> callback = new Callback<ApiResponse<String>>() {
+        Callback<String> callback = new Callback<String>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<String>> call,
-                                 @NonNull Response<ApiResponse<String>> response) {
-                boolean exitoso = response.isSuccessful() && response.body() != null;
-                ApiResponse<String> apiResponse = exitoso ? response.body() : null;
-                
-                mError.postValue(exitoso && apiResponse != null ? apiResponse.getMessage() : "Error al marcar todas");
-                Log.d("NOTIFICACIONES", exitoso ? "Todas las notificaciones marcadas" : "Error");
+            public void onResponse(@NonNull Call<String> call,
+                                 @NonNull Response<String> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    mError.postValue(response.body());
+                    Log.d("NOTIFICACIONES", "Todas las notificaciones marcadas");
+                } else {
+                    mError.postValue("Error al marcar todas");
+                    Log.d("NOTIFICACIONES", "Error HTTP: " + response.code());
+                }
                 
                 // Recargar notificaciones y contador
                 cargarNotificaciones();
@@ -198,7 +202,7 @@ public class NotificacionesViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                 mError.postValue("Error de conexión: " + t.getMessage());
                 Log.d("NOTIFICACIONES", "Error: " + t.getMessage());
             }
@@ -212,16 +216,20 @@ public class NotificacionesViewModel extends AndroidViewModel {
         boolean tokenValido = token != null && !token.isEmpty();
         
         ApiClient.MyApiInterface api = tokenValido ? ApiClient.getMyApiInterface(context) : null;
-        Call<ApiResponse<Void>> call = tokenValido && api != null ? 
+        Call<Void> call = tokenValido && api != null ? 
             api.eliminarNotificacion(token, notificacionId) : null;
 
-        Callback<ApiResponse<Void>> callback = new Callback<ApiResponse<Void>>() {
+        Callback<Void> callback = new Callback<Void>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<Void>> call,
-                                 @NonNull Response<ApiResponse<Void>> response) {
-                boolean exitoso = response.isSuccessful();
-                mError.postValue(exitoso ? "Notificación eliminada" : "Error al eliminar");
-                Log.d("NOTIFICACIONES", exitoso ? "Notificación eliminada" : "Error");
+            public void onResponse(@NonNull Call<Void> call,
+                                 @NonNull Response<Void> response) {
+                if (response.isSuccessful()) {
+                    mError.postValue("Notificación eliminada");
+                    Log.d("NOTIFICACIONES", "Notificación eliminada");
+                } else {
+                    mError.postValue("Error al eliminar");
+                    Log.d("NOTIFICACIONES", "Error HTTP: " + response.code());
+                }
                 
                 // Recargar notificaciones y contador
                 cargarNotificaciones();
@@ -229,7 +237,7 @@ public class NotificacionesViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 mError.postValue("Error de conexión: " + t.getMessage());
                 Log.d("NOTIFICACIONES", "Error al eliminar: " + t.getMessage());
             }

@@ -9,7 +9,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.LoginRequest;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.LoginResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
@@ -50,61 +49,34 @@ public class LoginActivityViewModel extends AndroidViewModel{
         
         LoginRequest loginRequest = new LoginRequest(email, password);
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<LoginResponse>> call = api.login(loginRequest);
+        Call<LoginResponse> call = api.login(loginRequest);
         Log.d("LOGIN", "URL: " + call.request().url().toString());
         
-        call.enqueue(new Callback<ApiResponse<LoginResponse>>() {
+        call.enqueue(new Callback<LoginResponse>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<LoginResponse>> call, 
-                                 @NonNull Response<ApiResponse<LoginResponse>> response) {
+            public void onResponse(@NonNull Call<LoginResponse> call, 
+                                 @NonNull Response<LoginResponse> response) {
                 mCargando.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<LoginResponse> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        LoginResponse loginResponse = apiResponse.getData();
-                        Log.d("LOGIN", "Login exitoso: " + loginResponse.getPropietario().getNombreCompleto());
-                        
-                        // Guardar token y propietario
-                        ApiClient.guardarToken(context, loginResponse.getToken());
-                        ApiClient.guardarPropietario(context, loginResponse.getPropietario());
-                        
-                        // Ir a MainActivity
-                        Intent intent = new Intent(context, MainActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                    } else {
-                        String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al iniciar sesión";
-                        Log.d("LOGIN", "Error en respuesta: " + errorMsg);
-                        mutable.postValue(errorMsg);
-                    }
+                    LoginResponse loginResponse = response.body();
+                    Log.d("LOGIN", "Login exitoso: " + loginResponse.getPropietario().getNombreCompleto());
+                    
+                    // Guardar token y propietario
+                    ApiClient.guardarToken(context, loginResponse.getToken());
+                    ApiClient.guardarPropietario(context, loginResponse.getPropietario());
+                    
+                    // Ir a MainActivity
+                    Intent intent = new Intent(context, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
                 } else {
                     Log.d("LOGIN", "Error HTTP: " + response.code());
-                    String errorMessage = "Error del servidor (HTTP " + response.code() + ")";
-                    try {
-                        if (response.errorBody() != null) {
-                            String errorBody = response.errorBody().string();
-                            Log.d("LOGIN", "Error body completo: " + errorBody);
-                            // Intentar parsear como ApiResponse
-                            try {
-                                Gson gson = new Gson();
-                                ApiResponse<?> errorResponse = gson.fromJson(errorBody, ApiResponse.class);
-                                if (errorResponse != null && errorResponse.getMessage() != null) {
-                                    errorMessage = errorResponse.getMessage();
-                                }
-                            } catch (Exception parseEx) {
-                                Log.d("LOGIN", "No se pudo parsear error como ApiResponse");
-                            }
-                        }
-                    } catch (Exception e) {
-                        Log.d("LOGIN", "Error al leer errorBody: " + e.getMessage());
-                    }
-                    mutable.postValue(errorMessage);
+                    mutable.postValue("Error al iniciar sesión: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<LoginResponse>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
                 mCargando.postValue(false);
                 Log.d("LOGIN", "Error de conexión: " + t.getMessage());
                 mutable.postValue("Error de conexión: " + t.getMessage());

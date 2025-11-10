@@ -17,7 +17,6 @@ import androidx.lifecycle.MutableLiveData;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.CrearInmuebleRequest;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Localidad;
@@ -246,26 +245,18 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
         Log.d("CARGAR_INMUEBLE", "Creando inmueble: " + direccion);
 
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<Inmueble>> call = api.crearInmueble(token, request);
+        Call<Inmueble> call = api.crearInmueble(token, request);
 
-        call.enqueue(new Callback<ApiResponse<Inmueble>>() {
+        call.enqueue(new Callback<Inmueble>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<Inmueble>> call,
-                                 @NonNull Response<ApiResponse<Inmueble>> response) {
+            public void onResponse(@NonNull Call<Inmueble> call,
+                                 @NonNull Response<Inmueble> response) {
                 mCargando.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<Inmueble> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        Log.d("CARGAR_INMUEBLE", "Inmueble creado exitosamente: " + 
-                              apiResponse.getData().getId());
-                        mMensaje.postValue("Inmueble creado exitosamente");
-                        mInmuebleCreado.postValue(true);
-                    } else {
-                        String errorMsg = apiResponse.getMessage() != null ? 
-                            apiResponse.getMessage() : "Error al crear el inmueble";
-                        Log.d("CARGAR_INMUEBLE", "Error en respuesta: " + errorMsg);
-                        mMensaje.postValue(errorMsg);
-                    }
+                    Inmueble inmueble = response.body();
+                    Log.d("CARGAR_INMUEBLE", "Inmueble creado exitosamente: " + inmueble.getId());
+                    mMensaje.postValue("Inmueble creado exitosamente");
+                    mInmuebleCreado.postValue(true);
                 } else {
                     Log.d("CARGAR_INMUEBLE", "Error HTTP: " + response.code());
                     mMensaje.postValue("Error al crear el inmueble: " + response.code());
@@ -273,7 +264,7 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<Inmueble>> call, 
+            public void onFailure(@NonNull Call<Inmueble> call, 
                                 @NonNull Throwable t) {
                 mCargando.postValue(false);
                 Log.d("CARGAR_INMUEBLE", "Error de conexión: " + t.getMessage());
@@ -291,23 +282,21 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
         }
         
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<List<Provincia>>> call = api.listarProvincias(token);
+        Call<List<Provincia>> call = api.listarProvincias(token);
         
-        call.enqueue(new Callback<ApiResponse<List<Provincia>>>() {
+        call.enqueue(new Callback<List<Provincia>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<Provincia>>> call,
-                                 @NonNull Response<ApiResponse<List<Provincia>>> response) {
+            public void onResponse(@NonNull Call<List<Provincia>> call,
+                                 @NonNull Response<List<Provincia>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<Provincia>> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        mProvincias.postValue(apiResponse.getData());
-                        Log.d("CARGAR_INMUEBLE", "Provincias cargadas: " + apiResponse.getData().size());
-                    }
+                    List<Provincia> provincias = response.body();
+                    mProvincias.postValue(provincias);
+                    Log.d("CARGAR_INMUEBLE", "Provincias cargadas: " + provincias.size());
                 }
             }
             
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<Provincia>>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<List<Provincia>> call, @NonNull Throwable t) {
                 Log.d("CARGAR_INMUEBLE", "Error al cargar provincias: " + t.getMessage());
             }
         });
@@ -322,23 +311,21 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
         }
         
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<List<Localidad>>> call = api.listarLocalidadesPorProvincia(token, nombreProvincia);
+        Call<List<Localidad>> call = api.listarLocalidadesPorProvincia(token, nombreProvincia);
         
-        call.enqueue(new Callback<ApiResponse<List<Localidad>>>() {
+        call.enqueue(new Callback<List<Localidad>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<Localidad>>> call,
-                                 @NonNull Response<ApiResponse<List<Localidad>>> response) {
+            public void onResponse(@NonNull Call<List<Localidad>> call,
+                                 @NonNull Response<List<Localidad>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<Localidad>> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        mLocalidades.postValue(apiResponse.getData());
-                        Log.d("CARGAR_INMUEBLE", "Localidades cargadas: " + apiResponse.getData().size());
-                    }
+                    List<Localidad> localidades = response.body();
+                    mLocalidades.postValue(localidades);
+                    Log.d("CARGAR_INMUEBLE", "Localidades cargadas: " + localidades.size());
                 }
             }
             
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<Localidad>>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<List<Localidad>> call, @NonNull Throwable t) {
                 Log.d("CARGAR_INMUEBLE", "Error al cargar localidades: " + t.getMessage());
             }
         });
@@ -353,23 +340,21 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
         }
         
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<List<TipoInmueble>>> call = api.listarTiposInmueble(token);
+        Call<List<TipoInmueble>> call = api.listarTiposInmueble(token);
         
-        call.enqueue(new Callback<ApiResponse<List<TipoInmueble>>>() {
+        call.enqueue(new Callback<List<TipoInmueble>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<TipoInmueble>>> call,
-                                 @NonNull Response<ApiResponse<List<TipoInmueble>>> response) {
+            public void onResponse(@NonNull Call<List<TipoInmueble>> call,
+                                 @NonNull Response<List<TipoInmueble>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<TipoInmueble>> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        mTiposInmueble.postValue(apiResponse.getData());
-                        Log.d("CARGAR_INMUEBLE", "Tipos de inmueble cargados: " + apiResponse.getData().size());
-                    }
+                    List<TipoInmueble> tipos = response.body();
+                    mTiposInmueble.postValue(tipos);
+                    Log.d("CARGAR_INMUEBLE", "Tipos de inmueble cargados: " + tipos.size());
                 }
             }
             
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<TipoInmueble>>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<List<TipoInmueble>> call, @NonNull Throwable t) {
                 Log.d("CARGAR_INMUEBLE", "Error al cargar tipos: " + t.getMessage());
             }
         });
