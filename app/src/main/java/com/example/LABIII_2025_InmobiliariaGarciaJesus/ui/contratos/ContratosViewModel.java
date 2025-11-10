@@ -166,6 +166,29 @@ public class ContratosViewModel extends AndroidViewModel {
     }
     
     /**
+     * Formatea una fecha ISO para mostrar solo la fecha (sin hora)
+     * Ej: "2025-06-11T00:00:00" -> "2025-06-11"
+     */
+    private String formatearSoloFecha(String fechaISO) {
+        if (fechaISO == null || fechaISO.isEmpty()) {
+            return "No especificado";
+        }
+        
+        // Si tiene el formato ISO con 'T', extraer solo la parte de la fecha
+        if (fechaISO.contains("T")) {
+            return fechaISO.split("T")[0];
+        }
+        
+        // Si tiene espacio (otro formato con hora), extraer la parte antes del espacio
+        if (fechaISO.contains(" ")) {
+            return fechaISO.split(" ")[0];
+        }
+        
+        // Si ya está en formato correcto, devolverlo tal cual
+        return fechaISO;
+    }
+    
+    /**
      * Prepara todos los datos del detalle con validaciones y formateo.
      * Toda la lógica de negocio y validaciones están aquí.
      */
@@ -192,10 +215,10 @@ public class ContratosViewModel extends AndroidViewModel {
         
         // Preparar datos del contrato con formateo
         mPrecio.postValue(String.format("$ %.2f/mes", contrato.getPrecio()));
-        mFechaInicio.postValue("Inicio: " + (contrato.getFechaInicio() != null ? contrato.getFechaInicio() : "No especificado"));
-        mFechaFin.postValue("Fin: " + (contrato.getFechaFin() != null ? contrato.getFechaFin() : "No especificado"));
+        mFechaInicio.postValue("Inicio: " + formatearSoloFecha(contrato.getFechaInicio()));
+        mFechaFin.postValue("Fin: " + formatearSoloFecha(contrato.getFechaFin()));
         mEstado.postValue("Estado: " + (contrato.getEstado() != null ? contrato.getEstado() : "No especificado"));
-        mFechaCreacion.postValue("Creado: " + (contrato.getFechaCreacion() != null ? contrato.getFechaCreacion() : "No especificado"));
+        mFechaCreacion.postValue("Creado: " + formatearSoloFecha(contrato.getFechaCreacion()));
         
         // Preparar información de deuda con lógica de visibilidad
         if (contrato.getMesesAdeudados() != null && contrato.getMesesAdeudados() > 0) {

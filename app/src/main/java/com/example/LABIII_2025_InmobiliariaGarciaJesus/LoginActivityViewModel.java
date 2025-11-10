@@ -43,55 +43,14 @@ public class LoginActivityViewModel extends AndroidViewModel{
         return  mCargando;
     }
     
-    // Método legacy - mantener compatibilidad
-    public void Login(String usuario, String clave){
-        loginLegacy(usuario, clave);
-    }
-    
-    // Login con API antigua (compatibilidad)
-    private void loginLegacy(String usuario, String clave){
-        mCargando.postValue(true);
-        ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<String> call = api.login(usuario, clave);
-        
-        call.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                mCargando.postValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    String token = response.body();
-                    Log.d("LOGIN", "Token recibido (legacy): " + token);
-                    
-                    // Guardar el token usando ApiClient
-                    ApiClient.guardarToken(context, token);
-                    
-                    // Ir a MainActivity
-                    Intent intent = new Intent(context, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
-                } else {
-                    Log.d("LOGIN", "Error en respuesta: " + response.code());
-                    mutable.postValue("Usuario y/o clave incorrecto");
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                mCargando.postValue(false);
-                Log.d("LOGIN", "Error de conexión: " + t.getMessage());
-                mutable.postValue("Error de conexión: " + t.getMessage());
-            }
-        });
-    }
-    
-    // Nuevo método con API REST moderna
-    public void loginNuevo(String email, String password){
+    // Login con API REST moderna
+    public void login(String email, String password){
         mCargando.postValue(true);
         Log.d("LOGIN", "Intentando login con email: " + email);
         
         LoginRequest loginRequest = new LoginRequest(email, password);
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<ApiResponse<LoginResponse>> call = api.loginNuevo(loginRequest);
+        Call<ApiResponse<LoginResponse>> call = api.login(loginRequest);
         Log.d("LOGIN", "URL: " + call.request().url().toString());
         
         call.enqueue(new Callback<ApiResponse<LoginResponse>>() {

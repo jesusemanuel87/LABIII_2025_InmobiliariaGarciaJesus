@@ -4,13 +4,10 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +18,6 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -169,6 +164,14 @@ public class CargarInmuebleFragment extends Fragment {
                             android.R.layout.simple_spinner_item, provincias);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     spinnerProvincia.setAdapter(adapter);
+                    
+                    // Seleccionar "San Luis" por defecto
+                    for (int i = 0; i < provincias.size(); i++) {
+                        if (provincias.get(i).getNombre().equalsIgnoreCase("San Luis")) {
+                            spinnerProvincia.setSelection(i);
+                            break;
+                        }
+                    }
                 }
             }
         });
@@ -182,6 +185,14 @@ public class CargarInmuebleFragment extends Fragment {
                             android.R.layout.simple_spinner_item, localidades);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     spinnerLocalidad.setAdapter(adapter);
+                    
+                    // Seleccionar "San Luis" por defecto
+                    for (int i = 0; i < localidades.size(); i++) {
+                        if (localidades.get(i).getNombre().equalsIgnoreCase("San Luis")) {
+                            spinnerLocalidad.setSelection(i);
+                            break;
+                        }
+                    }
                 }
             }
         });
@@ -249,37 +260,22 @@ public class CargarInmuebleFragment extends Fragment {
     }
 
     private void guardarInmueble() {
-        // Obtener dirección del TextInput
+        // Obtener datos simples de TextInputs
         String direccion = etDireccion.getText() != null ? etDireccion.getText().toString() : "";
-        
-        // Obtener provincia y localidad de los spinners
-        String provincia = "";
-        String localidad = "";
-        if (spinnerProvincia.getSelectedItem() instanceof Provincia) {
-            provincia = ((Provincia) spinnerProvincia.getSelectedItem()).getNombre();
-        }
-        if (spinnerLocalidad.getSelectedItem() instanceof Localidad) {
-            localidad = ((Localidad) spinnerLocalidad.getSelectedItem()).getNombre();
-        }
-        
-        // Obtener tipo de inmueble del spinner
-        int tipoId = 0;
-        if (spinnerTipo.getSelectedItem() instanceof TipoInmueble) {
-            tipoId = ((TipoInmueble) spinnerTipo.getSelectedItem()).getId();
-        }
-        
-        // Obtener uso del spinner (hardcodeado)
-        int uso = spinnerUso.getSelectedItemPosition();
-        
-        // Obtener otros valores de campos de texto
         String ambientes = etAmbientes.getText() != null ? etAmbientes.getText().toString() : "";
         String superficie = etSuperficie.getText() != null ? etSuperficie.getText().toString() : "";
         String precio = etPrecio.getText() != null ? etPrecio.getText().toString() : "";
         String latitud = etLatitud.getText() != null ? etLatitud.getText().toString() : "";
         String longitud = etLongitud.getText() != null ? etLongitud.getText().toString() : "";
         
-        // El ViewModel se encarga de todas las validaciones y conversiones
-        mv.crearInmueble(direccion, localidad, provincia, tipoId, ambientes, 
+        // Obtener objetos completos de los spinners (sin lógica)
+        Provincia provincia = (Provincia) spinnerProvincia.getSelectedItem();
+        Localidad localidad = (Localidad) spinnerLocalidad.getSelectedItem();
+        TipoInmueble tipo = (TipoInmueble) spinnerTipo.getSelectedItem();
+        int uso = spinnerUso.getSelectedItemPosition();
+        
+        // El ViewModel valida y procesa todo
+        mv.crearInmueble(direccion, localidad, provincia, tipo, ambientes, 
                         superficie, uso, precio, latitud, longitud, imagenBase64, imagenNombre);
     }
     
@@ -297,31 +293,16 @@ public class CargarInmuebleFragment extends Fragment {
             && data != null && data.getData() != null) {
             
             Uri imageUri = data.getData();
-            try {
-                // Obtener el nombre del archivo
-                String[] projection = {MediaStore.Images.Media.DISPLAY_NAME};
-                android.database.Cursor cursor = getActivity().getContentResolver()
-                    .query(imageUri, projection, null, null, null);
-                if (cursor != null && cursor.moveToFirst()) {
-                    int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-                    imagenNombre = cursor.getString(columnIndex);
-                    cursor.close();
-                }
-                
-                if (imagenNombre == null) {
-                    imagenNombre = "inmueble_" + System.currentTimeMillis() + ".jpg";
-                }
-                
-                // Cargar la imagen
-                InputStream inputStream = getActivity().getContentResolver().openInputStream(imageUri);
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                inputStream.close();
-                
-                // Redimensionar si es muy grande
-                Bitmap bitmapRedimensionado = redimensionarBitmap(bitmap, 1024, 1024);
-                
-                // Convertir a Base64
-                imagenBase64 = convertirBitmapABase64(bitmapRedimensionado);
+            
+            // Obtener nombre del archivo usando el ViewModel
+            imagenNombre = mv.obtenerNombreArchivoDesdeUri(imageUri);
+            
+            // Procesar imagen usando el ViewModel
+            Bitmap bitmapRedimensionado = mv.procesarImagenDesdeUri(imageUri, imagenNombre);
+            
+            if (bitmapRedimensionado != null) {
+                // Convertir a Base64 usando el ViewModel
+                imagenBase64 = mv.bitmapABase64(bitmapRedimensionado);
                 
                 // Mostrar preview
                 ivPreviewImagen.setImageBitmap(bitmapRedimensionado);
@@ -330,42 +311,7 @@ public class CargarInmuebleFragment extends Fragment {
                 
                 Toast.makeText(getContext(), "Imagen seleccionada: " + imagenNombre, 
                              Toast.LENGTH_SHORT).show();
-                
-                Log.d("CARGAR_INMUEBLE", "Imagen cargada: " + imagenNombre + 
-                      ", tamaño Base64: " + (imagenBase64 != null ? imagenBase64.length() : 0));
-                
-            } catch (Exception e) {
-                Log.e("CARGAR_INMUEBLE", "Error al cargar imagen: " + e.getMessage());
-                Toast.makeText(getContext(), "Error al cargar la imagen", Toast.LENGTH_SHORT).show();
             }
         }
-    }
-    
-    private Bitmap redimensionarBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        
-        if (width <= maxWidth && height <= maxHeight) {
-            return bitmap;
-        }
-        
-        float aspectRatio = (float) width / height;
-        
-        if (width > height) {
-            width = maxWidth;
-            height = (int) (width / aspectRatio);
-        } else {
-            height = maxHeight;
-            width = (int) (height * aspectRatio);
-        }
-        
-        return Bitmap.createScaledBitmap(bitmap, width, height, true);
-    }
-    
-    private String convertirBitmapABase64(Bitmap bitmap) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 }

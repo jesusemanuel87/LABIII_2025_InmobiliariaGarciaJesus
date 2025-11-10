@@ -42,8 +42,8 @@ public class LoginActivity extends AppCompatActivity implements SensorEventListe
         binding.btLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v){
-                // Usar loginNuevo() con API REST que retorna modelo Propietario
-                mv.loginNuevo(
+                // Login con API REST que retorna modelo Propietario
+                mv.login(
                         binding.edUser.getText().toString(),
                         binding.edPass.getText().toString()
                 );

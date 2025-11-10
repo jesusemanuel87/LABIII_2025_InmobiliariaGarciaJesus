@@ -11,6 +11,10 @@ import androidx.lifecycle.MutableLiveData;
 
 import android.view.View;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ActualizarEstadoInmuebleRequest;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
@@ -48,6 +52,21 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
     public DetalleInmuebleViewModel(@NonNull Application application) {
         super(application);
         this.context = application.getApplicationContext();
+    }
+    
+    /**
+     * Formatea un número con formato argentino:
+     * - Separador de miles: punto (.)
+     * - Separador de decimales: coma (,)
+     * Ejemplo: 100000.50 -> "100.000,50"
+     */
+    private String formatearNumeroArgentino(double numero) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("es", "AR"));
+        symbols.setGroupingSeparator('.');
+        symbols.setDecimalSeparator(',');
+        
+        DecimalFormat formatter = new DecimalFormat("#,##0.00", symbols);
+        return formatter.format(numero);
     }
 
     public LiveData<Inmueble> getMInmueble() {
@@ -319,18 +338,18 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         mTipo.postValue("Tipo: " + inmueble.getTipoNombre());
         mAmbientes.postValue("Ambientes: " + inmueble.getAmbientes());
         
-        // Superficie con validación
+        // Superficie con validación y formato argentino
         if (inmueble.getSuperficie() != null) {
-            mSuperficie.postValue(String.format("Superficie: %.2f m²", inmueble.getSuperficie()));
+            mSuperficie.postValue("Superficie: " + formatearNumeroArgentino(inmueble.getSuperficie()) + " m²");
         } else {
             mSuperficie.postValue("Superficie: No especificada");
         }
         
         mUso.postValue("Uso: " + inmueble.getUso());
         
-        // Precio con validación
+        // Precio con validación y formato argentino
         if (inmueble.getPrecio() != null) {
-            mPrecio.postValue(String.format("$ %.2f", inmueble.getPrecio()));
+            mPrecio.postValue("$ " + formatearNumeroArgentino(inmueble.getPrecio()));
         }
         
         // Disponibilidad con lógica de colores

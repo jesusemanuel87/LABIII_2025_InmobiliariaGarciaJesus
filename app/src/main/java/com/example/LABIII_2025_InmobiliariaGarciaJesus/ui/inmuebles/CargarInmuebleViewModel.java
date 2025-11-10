@@ -2,12 +2,20 @@ package com.example.LABIII_2025_InmobiliariaGarciaJesus.ui.inmuebles;
 
 import android.app.Application;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ApiResponse;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.CrearInmuebleRequest;
@@ -79,7 +87,45 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
         return mTiposInmueble;
     }
 
-    public void crearInmueble(String direccion, String localidad, String provincia, 
+    /**
+     * Versión mejorada: recibe objetos completos del Fragment
+     */
+    public void crearInmueble(String direccion, Localidad localidad, Provincia provincia,
+                              TipoInmueble tipo, String ambientesStr, String superficieStr, int uso,
+                              String precioStr, String latitudStr, String longitudStr,
+                              String imagenBase64, String imagenNombre) {
+        
+        // Validar objetos recibidos
+        if (provincia == null) {
+            mMensaje.postValue("Debe seleccionar una provincia");
+            return;
+        }
+        
+        if (localidad == null) {
+            mMensaje.postValue("Debe seleccionar una localidad");
+            return;
+        }
+        
+        if (tipo == null) {
+            mMensaje.postValue("Debe seleccionar un tipo de inmueble");
+            return;
+        }
+        
+        // Extraer datos de los objetos
+        String provinciaNombre = provincia.getNombre();
+        String localidadNombre = localidad.getNombre();
+        int tipoId = tipo.getId();
+        
+        // Llamar al método original
+        crearInmuebleInterno(direccion, localidadNombre, provinciaNombre, tipoId,
+                           ambientesStr, superficieStr, uso, precioStr, latitudStr,
+                           longitudStr, imagenBase64, imagenNombre);
+    }
+    
+    /**
+     * Método interno con la lógica de creación (antes era público)
+     */
+    private void crearInmuebleInterno(String direccion, String localidad, String provincia, 
                               int tipoId, String ambientesStr, String superficieStr, int uso, 
                               String precioStr, String latitudStr, String longitudStr,
                               String imagenBase64, String imagenNombre) {
@@ -87,16 +133,6 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
         // Validaciones de campos obligatorios
         if (direccion == null || direccion.trim().isEmpty()) {
             mMensaje.postValue("La dirección es obligatoria");
-            return;
-        }
-        
-        if (localidad == null || localidad.trim().isEmpty()) {
-            mMensaje.postValue("La localidad es obligatoria");
-            return;
-        }
-        
-        if (provincia == null || provincia.trim().isEmpty()) {
-            mMensaje.postValue("La provincia es obligatoria");
             return;
         }
         
@@ -337,5 +373,116 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
                 Log.d("CARGAR_INMUEBLE", "Error al cargar tipos: " + t.getMessage());
             }
         });
+    }
+    
+    /**
+     * Procesa una imagen desde Uri y guarda el Base64 internamente
+     * @param imageUri Uri de la imagen seleccionada
+     * @return Bitmap redimensionado para preview, o null si hay error
+     */
+    public Bitmap procesarImagenDesdeUri(Uri imageUri, String nombreArchivo) {
+        try {
+            // Si no hay nombre, generar uno
+            if (nombreArchivo == null || nombreArchivo.isEmpty()) {
+                nombreArchivo = "inmueble_" + System.currentTimeMillis() + ".jpg";
+            }
+            
+            // Cargar la imagen
+            InputStream inputStream = context.getContentResolver().openInputStream(imageUri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            
+            if (bitmap == null) {
+                mMensaje.postValue("Error al cargar la imagen");
+                return null;
+            }
+            
+            // Redimensionar si es muy grande
+            Bitmap bitmapRedimensionado = redimensionarBitmap(bitmap, 1024, 1024);
+            
+            // Convertir a Base64 y guardar internamente
+            String base64 = convertirBitmapABase64(bitmapRedimensionado);
+            
+            // Aquí podrías guardar en variables del ViewModel si lo necesitas
+            // Por ahora lo retornamos y el Fragment lo maneja
+            
+            Log.d("CARGAR_INMUEBLE_VM", "Imagen procesada: " + nombreArchivo + 
+                  ", tamaño Base64: " + (base64 != null ? base64.length() : 0));
+            
+            return bitmapRedimensionado;
+            
+        } catch (Exception e) {
+            Log.e("CARGAR_INMUEBLE_VM", "Error al procesar imagen: " + e.getMessage());
+            mMensaje.postValue("Error al procesar la imagen");
+            return null;
+        }
+    }
+    
+    /**
+     * Obtiene el nombre de archivo desde un Uri
+     */
+    public String obtenerNombreArchivoDesdeUri(Uri imageUri) {
+        String nombreArchivo = null;
+        try {
+            String[] projection = {MediaStore.Images.Media.DISPLAY_NAME};
+            android.database.Cursor cursor = context.getContentResolver()
+                .query(imageUri, projection, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+                nombreArchivo = cursor.getString(columnIndex);
+                cursor.close();
+            }
+        } catch (Exception e) {
+            Log.e("CARGAR_INMUEBLE_VM", "Error al obtener nombre de archivo: " + e.getMessage());
+        }
+        
+        if (nombreArchivo == null) {
+            nombreArchivo = "inmueble_" + System.currentTimeMillis() + ".jpg";
+        }
+        
+        return nombreArchivo;
+    }
+    
+    /**
+     * Redimensiona un Bitmap si excede el tamaño máximo
+     */
+    private Bitmap redimensionarBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        
+        if (width <= maxWidth && height <= maxHeight) {
+            return bitmap;
+        }
+        
+        float aspectRatio = (float) width / height;
+        
+        if (width > height) {
+            width = maxWidth;
+            height = (int) (width / aspectRatio);
+        } else {
+            height = maxHeight;
+            width = (int) (height * aspectRatio);
+        }
+        
+        return Bitmap.createScaledBitmap(bitmap, width, height, true);
+    }
+    
+    /**
+     * Convierte un Bitmap a String Base64
+     */
+    private String convertirBitmapABase64(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+    
+    /**
+     * Convierte un Bitmap a Base64 directamente (método público para el Fragment)
+     */
+    public String bitmapABase64(Bitmap bitmap) {
+        return convertirBitmapABase64(bitmap);
     }
 }

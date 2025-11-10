@@ -182,29 +182,9 @@ public class ApiClient {
     }
 
     public interface MyApiInterface{
-        // ==================== ENDPOINTS LEGACY (Compatibilidad) ====================
-        @FormUrlEncoded
-        @POST("api/Propietarios/login")
-        Call<String> login(@Field("Usuario") String usuario, @Field("Clave") String clave);
-
-        @GET("api/Propietarios")
-        Call<Propietarios> leer(@Header("Authorization") String token);
-
-        @PUT("api/Propietarios/actualizar")
-        Call<Propietarios> actualizar(@Header("Authorization") String token, @Body Propietarios propietario);
-
-        @GET("api/Inmuebles")
-        Call<List<Inmueble>> obtenerInmuebles(@Header("Authorization") String token);
-
-        @GET("api/contratos/inmueble/{id}")
-        Call<Contrato> obtenerContratoPorInmueble(@Header("Authorization") String token, @Path("id") int inmuebleId);
-
-        @GET("api/pagos/contrato/{id}")
-        Call<List<Pago>> obtenerPagosPorContrato(@Header("Authorization") String token, @Path("id") int contratoId);
-        
         // === AUTENTICACIÓN (AuthApi) ===
         @POST("api/AuthApi/login")
-        Call<ApiResponse<LoginResponse>> loginNuevo(@Body LoginRequest loginRequest);
+        Call<ApiResponse<LoginResponse>> login(@Body LoginRequest loginRequest);
 
         @FormUrlEncoded
         @PUT("api/Propietarios/changePassword")

@@ -17,7 +17,10 @@ import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
+import java.util.Locale;
 
 public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.ViewHolder> {
     
@@ -25,6 +28,21 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
     private Context context;
     private OnInmuebleClickListener listener;
     private OnEstadoChangeListener estadoListener;
+    
+    /**
+     * Formatea un número con formato argentino:
+     * - Separador de miles: punto (.)
+     * - Separador de decimales: coma (,)
+     * Ejemplo: 100000.50 -> "100.000,50"
+     */
+    private static String formatearNumeroArgentino(double numero) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("es", "AR"));
+        symbols.setGroupingSeparator('.');
+        symbols.setDecimalSeparator(',');
+        
+        DecimalFormat formatter = new DecimalFormat("#,##0.00", symbols);
+        return formatter.format(numero);
+    }
 
     public interface OnInmuebleClickListener {
         void onInmuebleClick(Inmueble inmueble);
@@ -139,7 +157,7 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
             tvTipo.setText(inmueble.getTipoNombre());
             
             if (inmueble.getPrecio() != null) {
-                tvPrecio.setText(String.format("$ %.2f", inmueble.getPrecio()));
+                tvPrecio.setText("$ " + formatearNumeroArgentino(inmueble.getPrecio()));
             } else {
                 tvPrecio.setText("Precio no disponible");
             }
