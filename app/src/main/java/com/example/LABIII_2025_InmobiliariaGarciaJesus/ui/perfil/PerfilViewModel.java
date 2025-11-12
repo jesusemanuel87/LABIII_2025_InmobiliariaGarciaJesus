@@ -28,6 +28,7 @@ public class PerfilViewModel extends AndroidViewModel {
     private MutableLiveData<Integer> mIconoBoton;
     private MutableLiveData<Boolean> mSolicitarFoco;
     private MutableLiveData<Integer> mFondoCampos;
+    private MutableLiveData<Boolean> mCargando;
 
     public PerfilViewModel(@NonNull Application application) {
         super(application);
@@ -82,16 +83,25 @@ public class PerfilViewModel extends AndroidViewModel {
         }
         return mFondoCampos;
     }
+    
+    public LiveData<Boolean> getMCargando() {
+        if (mCargando == null) {
+            mCargando = new MutableLiveData<>(false);
+        }
+        return mCargando;
+    }
 
     public void cargarPerfil() {
         cargarPerfilNuevo();
     }
     
     private void cargarPerfilNuevo() {
+        mCargando.postValue(true);
         String token = ApiClient.getToken(context);
 
         if (token == null || token.isEmpty()) {
             mError.postValue("No hay sesión activa");
+            mCargando.postValue(false);
             Log.d("PERFIL", "No hay token guardado");
             return;
         }
@@ -103,6 +113,7 @@ public class PerfilViewModel extends AndroidViewModel {
             @Override
             public void onResponse(@NonNull Call<Propietario> call, 
                                  @NonNull Response<Propietario> response) {
+                mCargando.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
                     Propietario propietario = response.body();
                     Log.d("PERFIL", "Datos cargados (REST): " + propietario.toString());
@@ -117,6 +128,7 @@ public class PerfilViewModel extends AndroidViewModel {
 
             @Override
             public void onFailure(@NonNull Call<Propietario> call, @NonNull Throwable t) {
+                mCargando.postValue(false);
                 Log.d("PERFIL", "Error de conexión: " + t.getMessage());
                 mError.postValue("Error de conexión: " + t.getMessage());
             }
@@ -151,16 +163,19 @@ public class PerfilViewModel extends AndroidViewModel {
             mError.postValue("El apellido es obligatorio");
             return;
         }
-
+        
+        mCargando.postValue(true);
         String token = ApiClient.getToken(context);
         if (token == null || token.isEmpty()) {
             mError.postValue("No hay sesión activa");
+            mCargando.postValue(false);
             return;
         }
 
         Propietario propietarioActual = mPropietario.getValue();
         if (propietarioActual == null) {
             mError.postValue("No hay datos del propietario");
+            mCargando.postValue(false);
             return;
         }
 
@@ -178,6 +193,7 @@ public class PerfilViewModel extends AndroidViewModel {
             @Override
             public void onResponse(@NonNull Call<Propietario> call, 
                                  @NonNull Response<Propietario> response) {
+                mCargando.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
                     Propietario propietarioActualizado = response.body();
                     Log.d("PERFIL", "Perfil actualizado correctamente");
@@ -197,6 +213,7 @@ public class PerfilViewModel extends AndroidViewModel {
 
             @Override
             public void onFailure(@NonNull Call<Propietario> call, @NonNull Throwable t) {
+                mCargando.postValue(false);
                 Log.d("PERFIL", "Error de conexión: " + t.getMessage());
                 mError.postValue("Error de conexión: " + t.getMessage());
             }

@@ -101,6 +101,17 @@ public class PerfilFragment extends Fragment {
             }
         });
 
+        // Observer para estado de carga
+        mv.getMCargando().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean cargando) {
+                boolean isLoading = Boolean.TRUE.equals(cargando);
+                binding.progressBarPerfil.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                binding.btnEditar.setEnabled(!isLoading);
+                binding.btnCambiarPassword.setEnabled(!isLoading);
+            }
+        });
+
         // Listener del botón editar/guardar
         binding.btnEditar.setOnClickListener(new View.OnClickListener() {
             @Override
