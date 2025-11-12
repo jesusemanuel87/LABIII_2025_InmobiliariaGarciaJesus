@@ -1,0 +1,47 @@
+@startuml
+actor Usuario
+
+participant "PerfilFragment\n(View)" as PerfilFragment
+participant "PerfilViewModel\n(ViewModel)" as PerfilVM
+participant "ApiClient / Retrofit\n(PropietarioApi)" as PropApi
+database "SharedPreferences\n(ApiClient.storage)" as SharedPrefs
+participant "CambiarPasswordDialog\n(Dialog)" as ChangeDialog
+
+== Ver perfil ==
+Usuario -> PerfilFragment : abrir sección Perfil
+PerfilFragment -> PerfilVM : cargarPerfil()
+activate PerfilVM
+PerfilVM -> PropApi : GET /api/PropietarioApi/perfil (token)
+activate PropApi
+PropApi --> PerfilVM : 200 OK (Propietario)
+deactivate PropApi
+PerfilVM -> SharedPrefs : guardarPropietario(propietario)
+PerfilVM -> PerfilFragment : mPropietario.postValue(propietario)
+deactivate PerfilVM
+PerfilFragment -> PerfilFragment : onChanged(propietario) -> actualizar vistas
+
+== Editar perfil ==
+Usuario -> PerfilFragment : pulsar btnEditar (modo edición)
+PerfilFragment -> PerfilVM : onBotonEditarClick(nombre, apellido, email, telefono)
+PerfilVM -> PerfilVM : si !modo -> mModoEdicion.postValue(true)
+Usuario -> PerfilFragment : editar campos y pulsar Guardar
+PerfilFragment -> PerfilVM : onBotonEditarClick(...) // modo edición = true
+PerfilVM -> PropApi : PUT /api/PropietarioApi/perfil (ActualizarPerfilRequest)
+activate PropApi
+PropApi --> PerfilVM : 200 OK (Propietario actualizado)
+deactivate PropApi
+PerfilVM -> SharedPrefs : guardarPropietario(propietarioActualizado)
+PerfilVM -> PerfilFragment : mPropietario.postValue(propietarioActualizado)
+PerfilFragment -> PerfilFragment : onChanged -> actualizar UI, desactivar modo edición
+
+== Cambiar contraseña ==
+Usuario -> PerfilFragment : pulsar btnCambiarPassword
+PerfilFragment -> ChangeDialog : show()
+Usuario -> ChangeDialog : llenar current/new/confirm
+ChangeDialog -> PropApi : PUT /api/Propietarios/changePassword (form data)
+activate PropApi
+PropApi --> ChangeDialog : 200 OK / 400 / 401 / 500
+deactivate PropApi
+ChangeDialog -> Usuario : Toast (resultado) ; dismiss() si OK
+
+@enduml

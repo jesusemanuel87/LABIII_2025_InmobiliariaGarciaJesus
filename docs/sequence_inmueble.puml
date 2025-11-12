@@ -1,0 +1,49 @@
+@startuml
+actor Usuario
+
+participant "InmueblesFragment\n(View)" as InmueblesFragment
+participant "CargarInmuebleFragment\n(View)" as CargarFrag
+participant "CargarInmuebleViewModel\n(ViewModel)" as CargarVM
+participant "ApiClient / Retrofit\n(InmueblesApi)" as InmueblesApi
+participant "DetalleInmuebleFragment\n(View)" as DetalleFrag
+participant "DetalleInmuebleViewModel\n(ViewModel)" as DetalleVM
+participant "InmueblesAdapter\n(Adapter)" as Adapter
+participant "RecyclerView\n(View)" as RecyclerView
+
+== Crear Inmueble ==
+Usuario -> CargarFrag : abrir formulario Agregar Inmueble
+CargarFrag -> CargarVM : crearInmueble(...)
+activate CargarVM
+CargarVM -> InmueblesApi : POST /api/InmueblesApi (CrearInmuebleRequest)
+activate InmueblesApi
+InmueblesApi --> CargarVM : 200 OK (Inmueble)
+deactivate InmueblesApi
+CargarVM -> CargarFrag : mInmuebleCreado.postValue(true)
+deactivate CargarVM
+CargarFrag -> NavHost : navigateUp() // volver al listado
+
+== Activar / Inactivar (cambiar estado) ==
+Usuario -> RecyclerView : click item
+RecyclerView -> Adapter : item click
+Adapter -> InmueblesFragment : navigate(detalleInmueble, id)
+InmueblesFragment -> DetalleFrag : mostrar fragment
+DetalleFrag -> DetalleVM : cargarInmueble(id)
+activate DetalleVM
+DetalleVM -> InmueblesApi : GET /api/InmueblesApi/{id}
+activate InmueblesApi
+InmueblesApi --> DetalleVM : 200 OK (Inmueble)
+deactivate InmueblesApi
+DetalleVM -> DetalleFrag : mInmueble.postValue(inmueble) ; prepararDatos()
+
+Usuario -> DetalleFrag : toggle switch
+DetalleFrag -> DetalleVM : cambiarEstadoInmueble(id, estado, false)
+activate DetalleVM
+DetalleVM -> InmueblesApi : PATCH /api/InmueblesApi/{id}/estado
+activate InmueblesApi
+InmueblesApi --> DetalleVM : 200 OK (Inmueble actualizado)
+deactivate InmueblesApi
+DetalleVM -> DetalleFrag : mInmueble.postValue(inmuebleActualizado)
+DetalleVM -> DetalleVM : prepararDatos(inmuebleActualizado)
+deactivate DetalleVM
+
+@enduml

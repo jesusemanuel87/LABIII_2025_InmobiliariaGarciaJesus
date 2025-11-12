@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="900" viewBox="0 0 1100 900">
+  <style>
+    .title { font: bold 18px sans-serif; }
+    .box { fill:#f7f7f9; stroke:#333; stroke-width:1; }
+    .lifeline { stroke:#888; stroke-dasharray:4 4; }
+    .arrow { stroke:#333; stroke-width:2; marker-end: url(#arrowhead); }
+    .note { font: 12px monospace; fill:#222; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+
+  <text x="20" y="30" class="title">Diagrama: Inmueble (Crear / Activar-Inactivar)</text>
+
+  <g transform="translate(20,60)">
+    <rect x="0" y="0" width="140" height="28" class="box"/>
+    <text x="10" y="20">Usuario</text>
+
+    <rect x="160" y="0" width="180" height="28" class="box"/>
+    <text x="170" y="20">CargarInmuebleFragment</text>
+
+    <rect x="360" y="0" width="200" height="28" class="box"/>
+    <text x="370" y="20">CargarInmuebleViewModel</text>
+
+    <rect x="580" y="0" width="220" height="28" class="box"/>
+    <text x="590" y="20">ApiClient / InmueblesApi</text>
+
+    <rect x="820" y="0" width="140" height="28" class="box"/>
+    <text x="830" y="20">DetalleFragment</text>
+
+    <line x1="70" x2="70" y1="40" y2="780" class="lifeline"/>
+    <line x1="250" x2="250" y1="40" y2="780" class="lifeline"/>
+    <line x1="460" x2="460" y1="40" y2="780" class="lifeline"/>
+    <line x1="690" x2="690" y1="40" y2="780" class="lifeline"/>
+    <line x1="890" x2="890" y1="40" y2="780" class="lifeline"/>
+
+    <text x="10" y="80" class="note">Crear inmueble: CargarInmuebleFragment -> CargarVM -> POST /InmueblesApi</text>
+    <line x1="460" y1="100" x2="690" y2="100" class="arrow" />
+    <text x="470" y="94" class="note">POST /api/InmueblesApi</text>
+    <line x1="690" y1="120" x2="460" y2="120" class="arrow" />
+    <text x="470" y="114" class="note">200 OK (Inmueble)</text>
+
+    <text x="10" y="160" class="note">Activar/Inactivar: DetalleFragment -> DetalleVM -> PATCH /InmueblesApi/{id}/estado</text>
+    <line x1="890" y1="180" x2="690" y2="180" class="arrow" />
+    <text x="700" y="174" class="note">PATCH /api/InmueblesApi/{id}/estado</text>
+    <line x1="690" y1="200" x2="890" y2="200" class="arrow" />
+    <text x="700" y="194" class="note">200 OK (Inmueble actualizado)</text>
+
+    <rect x="10" y="720" width="1080" height="60" rx="6" ry="6" fill="#fff7e6" stroke="#cc9a00"/>
+    <text x="30" y="748" class="note">Leyenda: Flujos usan ViewModels y LiveData para comunicar datos y estados hacia la UI.</text>
+  </g>
+</svg>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600">
+  <style>
+    .title { font: bold 20px sans-serif; }
+    .participant { font: 14px sans-serif; }
+    .box { fill:#f7f7f9; stroke:#333; stroke-width:1; }
+    .lifeline { stroke:#888; stroke-dasharray:4 4; }
+    .arrow { stroke:#333; stroke-width:2; marker-end: url(#arrowhead); }
+    .note { font: 12px monospace; fill:#222; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+
+  <text x="20" y="30" class="title">Diagrama de secuencia: Login &amp; Listado de Inmuebles</text>
+
+  <!-- Participants boxes -->
+  <g transform="translate(20,60)">
+    <!-- columns positions -->
+    <!-- x positions for participants -->
+    <!-- 11 participants across horizontally -->
+    <g id="participants">
+      <rect x="0" y="0" width="140" height="36" class="box"/>
+      <text x="10" y="22" class="participant">Usuario</text>
+
+      <rect x="160" y="0" width="160" height="36" class="box"/>
+      <text x="170" y="22" class="participant">LoginActivity\n(View)</text>
+
+      <rect x="340" y="0" width="200" height="36" class="box"/>
+      <text x="350" y="22" class="participant">LoginActivityViewModel\n(ViewModel)</text>
+
+      <rect x="560" y="0" width="200" height="36" class="box"/>
+      <text x="570" y="22" class="participant">ApiClient / Retrofit\n(AuthApi)</text>
+
+      <rect x="780" y="0" width="180" height="36" class="box"/>
+      <text x="790" y="22" class="participant">SharedPreferences</text>
+
+      <rect x="980" y="0" width="140" height="36" class="box"/>
+      <text x="990" y="22" class="participant">MainActivity</text>
+
+      <!-- next row of participants lower x positions -->
+      <rect x="160" y="120" width="200" height="36" class="box"/>
+      <text x="170" y="142" class="participant">NavHost / Drawer</text>
+
+      <rect x="380" y="120" width="180" height="36" class="box"/>
+      <text x="390" y="142" class="participant">InmueblesFragment\n(View)</text>
+
+      <rect x="580" y="120" width="220" height="36" class="box"/>
+      <text x="590" y="142" class="participant">InmueblesViewModel\n(ViewModel)</text>
+
+      <rect x="820" y="120" width="220" height="36" class="box"/>
+      <text x="830" y="142" class="participant">ApiClient / Retrofit\n(InmueblesApi)</text>
+
+      <rect x="1060" y="120" width="200" height="36" class="box"/>
+      <text x="1070" y="142" class="participant">InmueblesAdapter</text>
+
+      <rect x="1060" y="220" width="200" height="36" class="box"/>
+      <text x="1070" y="242" class="participant">RecyclerView</text>
+    </g>
+
+    <!-- Lifelines vertical lines -->
+    <g id="lifelines" transform="translate(0,60)">
+      <!-- draw lines under each participant -->
+      <line x1="70" x2="70" y1="0" y2="1300" class="lifeline" />
+      <line x1="240" x2="240" y1="0" y2="1300" class="lifeline" />
+      <line x1="440" x2="440" y1="0" y2="1300" class="lifeline" />
+      <line x1="660" x2="660" y1="0" y2="1300" class="lifeline" />
+      <line x1="870" x2="870" y1="0" y2="1300" class="lifeline" />
+      <line x1="1050" x2="1050" y1="0" y2="1300" class="lifeline" />
+      <!-- second row lifelines -->
+      <line x1="260" x2="260" y1="60" y2="1300" class="lifeline" />
+      <line x1="470" x2="470" y1="60" y2="1300" class="lifeline" />
+      <line x1="700" x2="700" y1="60" y2="1300" class="lifeline" />
+      <line x1="930" x2="930" y1="60" y2="1300" class="lifeline" />
+      <line x1="1160" x2="1160" y1="120" y2="1300" class="lifeline" />
+    </g>
+
+    <!-- Arrows / Messages (simplified vertical spacing) -->
+    <g transform="translate(0,220)">
+      <!-- Login sequence -->
+      <text x="10" y="0" class="note">1) Usuario -> LoginActivity : clickLogin(email,password)</text>
+
+      <line x1="240" y1="20" x2="440" y2="20" class="arrow" />
+      <text x="250" y="14" class="note">login(email,password)</text>
+
+      <line x1="440" y1="40" x2="660" y2="40" class="arrow" />
+      <text x="450" y="34" class="note">POST /api/AuthApi/login (async)</text>
+
+      <line x1="660" y1="60" x2="440" y2="60" class="arrow" />
+      <text x="450" y="54" class="note">200 OK (LoginResponse)</text>
+
+      <line x1="440" y1="80" x2="870" y2="80" class="arrow" />
+      <text x="450" y="74" class="note">guardarToken(token)</text>
+
+      <line x1="440" y1="100" x2="870" y2="100" class="arrow" />
+      <text x="450" y="94" class="note">guardarPropietario(propietario)</text>
+
+      <line x1="440" y1="120" x2="1050" y2="120" class="arrow" />
+      <text x="450" y="114" class="note">startActivity(MainActivity)</text>
+
+      <!-- Navigation to Inmuebles -->
+      <text x="10" y="160" class="note">2) Usuario -> NavHost : abrir menú Inmuebles</text>
+      <line x1="260" y1="180" x2="470" y2="180" class="arrow" />
+      <text x="270" y="174" class="note">mostrar InmueblesFragment</text>
+
+      <!-- cargarInmuebles -->
+      <line x1="470" y1="200" x2="700" y2="200" class="arrow" />
+      <text x="480" y="194" class="note">cargarInmuebles()</text>
+
+      <line x1="700" y1="220" x2="930" y2="220" class="arrow" />
+      <text x="710" y="214" class="note">GET /api/InmueblesApi (token)</text>
+
+      <line x1="930" y1="240" x2="700" y2="240" class="arrow" />
+      <text x="710" y="234" class="note">200 OK (List<Inmueble>)</text>
+
+      <line x1="700" y1="260" x2="470" y2="260" class="arrow" />
+      <text x="480" y="254" class="note">mInmuebles.postValue(lista)</text>
+
+      <line x1="470" y1="280" x2="1160" y2="280" class="arrow" />
+      <text x="480" y="274" class="note">setInmuebles(lista) -> notifyDataSetChanged()</text>
+
+      <!-- User interacts with Adapter -->
+      <text x="10" y="320" class="note">3) Usuario -> Adapter : click item / toggle</text>
+      <line x1="1160" y1="340" x2="470" y2="340" class="arrow" />
+      <text x="480" y="334" class="note">onInmuebleClick / onEstadoChange</text>
+
+      <line x1="470" y1="360" x2="700" y2="360" class="arrow" />
+      <text x="480" y="354" class="note">cambiarEstadoInmueble(id, estado)</text>
+
+      <line x1="700" y1="380" x2="930" y2="380" class="arrow" />
+      <text x="710" y="374" class="note">PATCH /api/InmueblesApi/{id}/estado</text>
+
+      <line x1="930" y1="400" x2="700" y2="400" class="arrow" />
+      <text x="710" y="394" class="note">200 OK (Inmueble actualizado)</text>
+
+      <line x1="700" y1="420" x2="470" y2="420" class="arrow" />
+      <text x="480" y="414" class="note">cargarInmuebles() (refresh)</text>
+
+    </g>
+
+    <!-- note at bottom -->
+    <rect x="10" y="980" width="1150" height="140" rx="6" ry="6" fill="#fff7e6" stroke="#cc9a00" />
+    <text x="30" y="1010" class="note">Leyenda: LiveData updates flow from ViewModel to Fragment (observer). Retrofit async callbacks use postValue(...) to update MutableLiveData.</text>
+
+  </g>
+</svg>

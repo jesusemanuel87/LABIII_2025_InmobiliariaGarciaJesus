@@ -1,0 +1,79 @@
+@startuml
+actor Usuario
+
+participant "LoginActivity\n(View)" as LoginActivity
+participant "LoginActivityViewModel\n(ViewModel)" as LoginVM
+participant "ApiClient / Retrofit\n(AuthApi)" as AuthApi
+database "SharedPreferences\n(ApiClient.storage)" as SharedPrefs
+participant "MainActivity\n(Activity)" as MainActivity
+participant "NavHost / Drawer\n(NavController)" as NavHost
+participant "InmueblesFragment\n(View)" as InmueblesFragment
+participant "InmueblesViewModel\n(ViewModel)" as InmueblesVM
+participant "ApiClient / Retrofit\n(InmueblesApi)" as InmueblesApi
+participant "InmueblesAdapter\n(Adapter/RecyclerView)" as Adapter
+participant "RecyclerView\n(View)" as RecyclerView
+
+== Login ==
+Usuario -> LoginActivity : clickLogin(email, password)
+LoginActivity -> LoginVM : login(email, password)
+activate LoginVM
+
+LoginVM -> AuthApi : POST /api/AuthApi/login (LoginRequest) [enqueue async]
+activate AuthApi
+AuthApi -> AuthApi : HTTP request to server
+AuthApi --> LoginVM : 200 OK (LoginResponse) // async callback
+deactivate AuthApi
+
+LoginVM -> SharedPrefs : guardarToken(token)
+LoginVM -> SharedPrefs : guardarPropietario(propietario)
+LoginVM -> MainActivity : startActivity() (Intent)
+deactivate LoginVM
+
+== Navegación a Inmuebles ==
+Usuario -> NavHost : abrir menú Inmuebles / navegar
+NavHost -> InmueblesFragment : crear/mostrar fragment
+activate InmueblesFragment
+
+InmueblesFragment -> InmueblesVM : obtener ViewModel (ViewModelProvider)
+InmueblesFragment -> InmueblesVM : cargarInmuebles()
+activate InmueblesVM
+
+InmueblesVM -> InmueblesApi : GET /api/InmueblesApi (Authorization: Bearer token)
+activate InmueblesApi
+InmueblesApi -> InmueblesApi : HTTP request to server
+InmueblesApi --> InmueblesVM : 200 OK (List<Inmueble>)
+deactivate InmueblesApi
+
+InmueblesVM -> InmueblesVM : mInmuebles.postValue(lista)
+InmueblesVM --> InmueblesFragment : LiveData notify observer (onChanged)
+deactivate InmueblesVM
+
+InmueblesFragment -> Adapter : setInmuebles(lista)
+Adapter -> RecyclerView : notifyDataSetChanged()
+note right of Adapter
+  Glide carga imágenes,
+  formatea precios,
+  setea estados y listeners
+end note
+
+== Interacción del usuario (detalle / cambiar estado) ==
+Usuario -> Adapter : click item / toggle switch
+Adapter -> InmueblesFragment : onInmuebleClick(inmueble) / onEstadoChange(inmueble, nuevoEstado)
+
+alt navegar a detalle
+  InmueblesFragment -> NavHost : navigate(detalleInmuebleFragment, inmuebleId)
+end
+
+alt cambiar estado
+  InmueblesFragment -> InmueblesVM : cambiarEstadoInmueble(id, estado)
+  activate InmueblesVM
+  InmueblesVM -> InmueblesApi : PATCH /api/InmueblesApi/{id}/estado
+  activate InmueblesApi
+  InmueblesApi --> InmueblesVM : 200 OK (Inmueble actualizado)
+  deactivate InmueblesApi
+  InmueblesVM -> InmueblesVM : mError.postValue("Estado actualizado") // opcional
+  InmueblesVM -> InmueblesVM : cargarInmuebles() // refrescar lista
+  deactivate InmueblesVM
+end
+
+@enduml
