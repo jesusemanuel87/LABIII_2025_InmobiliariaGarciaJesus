@@ -84,7 +84,7 @@ public class DetalleInmuebleFragment extends Fragment {
         btnVerEnMapa = root.findViewById(R.id.btnVerEnMapa);
         progressBar = root.findViewById(R.id.progressBarDetalle);
         
-        // Observer para el inmueble (solo para referencia en botón)
+        // Observer para el inmueble (solo para referencia interna)
         mv.getMInmueble().observe(getViewLifecycleOwner(), new Observer<Inmueble>() {
             @Override
             public void onChanged(Inmueble inmueble) {
@@ -92,20 +92,39 @@ public class DetalleInmuebleFragment extends Fragment {
             }
         });
         
-        // Listener del botón Ver en Mapa
+        // Observer para habilitar botón del mapa (sin lógica)
+        mv.getMBotonMapaEnabled().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean enabled) {
+                btnVerEnMapa.setEnabled(enabled);
+                if (!enabled) {
+                    btnVerEnMapa.setAlpha(0.5f);
+                } else {
+                    btnVerEnMapa.setAlpha(1.0f);
+                }
+            }
+        });
+        
+        // Listener del botón Ver en Mapa (sin lógica, solo navegación)
         btnVerEnMapa.setOnClickListener(v -> {
-            boolean hasCoordinates = inmuebleActual != null && inmuebleActual.getLatitud() != null && inmuebleActual.getLongitud() != null;
-            String mensaje = hasCoordinates ? "" : "No hay coordenadas disponibles para este inmueble";
+            // Obtener valores directamente del ViewModel (ya validados)
+            Double lat = mv.getMLatitud().getValue();
+            Double lng = mv.getMLongitud().getValue();
+            String titulo = mv.getMTituloMapa().getValue();
             
-            Toast.makeText(getContext(), mensaje, Toast.LENGTH_SHORT).show();
+            // Verificar si hay coordenadas válidas
+            Boolean hasCoordinates = mv.getMBotonMapaEnabled().getValue();
+            if (hasCoordinates == null || !hasCoordinates) {
+                Toast.makeText(getContext(), "No hay coordenadas disponibles para este inmueble", Toast.LENGTH_SHORT).show();
+                return;
+            }
             
             Bundle bundle = new Bundle();
-            bundle.putDouble("latitud", hasCoordinates ? inmuebleActual.getLatitud() : 0);
-            bundle.putDouble("longitud", hasCoordinates ? inmuebleActual.getLongitud() : 0);
-            bundle.putString("titulo", hasCoordinates ? inmuebleActual.getDireccion() : "");
+            bundle.putDouble("latitud", lat != null ? lat : 0.0);
+            bundle.putDouble("longitud", lng != null ? lng : 0.0);
+            bundle.putString("titulo", titulo != null ? titulo : "");
             
-            int destination = hasCoordinates ? R.id.menu_inicio : -1;
-            Navigation.findNavController(v).navigate(destination >= 0 ? destination : v.getId(), bundle);
+            Navigation.findNavController(v).navigate(R.id.menu_inicio, bundle);
         });
         
         // Observer para errores
@@ -129,15 +148,15 @@ public class DetalleInmuebleFragment extends Fragment {
             }
         });
         
-        // Observer para switch checked (patrón MVVM puro)
+        // Observer para switch checked (patrón MVVM puro - sin lógica)
         mv.getMSwitchChecked().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean checked) {
                 switchDisponible.setOnCheckedChangeListener(null);
                 switchDisponible.setChecked(checked);
                 switchDisponible.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    String estadoTexto = isChecked ? "Activo" : "Inactivo";
-                    mv.cambiarEstadoInmueble(inmuebleId, estadoTexto, false);
+                    // Sin lógica: delegar al ViewModel
+                    mv.onSwitchEstadoChanged(isChecked);
                 });
             }
         });

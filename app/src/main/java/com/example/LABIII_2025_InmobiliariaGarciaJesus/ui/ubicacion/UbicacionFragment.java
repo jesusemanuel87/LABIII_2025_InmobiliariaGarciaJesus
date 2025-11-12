@@ -39,13 +39,8 @@ public class UbicacionFragment extends Fragment {
             }
         });
         
-        // Obtener argumentos y pasarlos al ViewModel
-        Bundle args = getArguments();
-        double latitud = args != null ? args.getDouble("latitud", 0) : 0;
-        double longitud = args != null ? args.getDouble("longitud", 0) : 0;
-        String titulo = args != null ? args.getString("titulo", "Ubicación del Inmueble") : "Ubicación del Inmueble";
-        
-        mv.procesarArgumentos(latitud, longitud, titulo);
+        // Sin lógica: pasar el Bundle completo al ViewModel
+        mv.procesarArgumentosDesdeBundle(getArguments());
         
         return root;
     }

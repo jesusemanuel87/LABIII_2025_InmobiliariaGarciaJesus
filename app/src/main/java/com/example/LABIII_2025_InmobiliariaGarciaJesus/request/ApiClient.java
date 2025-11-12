@@ -33,7 +33,7 @@ import retrofit2.http.Path;
 
 public class ApiClient {
 
-    private static final String BASE_URL = "https://g3kgc7hj-5000.brs.devtunnels.ms/";
+    private static final String BASE_URL = "http://127.0.0.1:5000/";//"https://g3kgc7hj-5000.brs.devtunnels.ms/";
 
     private static MyApiInterface myApiInterface;
     private static String accessToken = null;

@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.location.Location;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.location.LocationCallback;
@@ -95,18 +96,39 @@ public class UbicacionViewModel extends AndroidViewModel {
         };
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
+            return;
         }
         fused.requestLocationUpdates(request, callback, null);
     }
 
-    public void procesarArgumentos(double latitud, double longitud, String titulo) {
+    /**
+     * Procesa argumentos desde un Bundle.
+     * Toda la lógica de extracción, validación y valores por defecto está aquí.
+     */
+    public void procesarArgumentosDesdeBundle(Bundle args) {
+        // Validación del Bundle y extracción de valores con defaults
+        double latitud = args != null ? args.getDouble("latitud", 0) : 0;
+        double longitud = args != null ? args.getDouble("longitud", 0) : 0;
+        String titulo = args != null ? args.getString("titulo", "Ubicación del Inmueble") : "Ubicación del Inmueble";
         
+        // Lógica de decisión: mapa específico o por defecto
         if (latitud != 0 && longitud != 0) {
             // Mostrar mapa del inmueble específico
             obtenerMapaInmueble(latitud, longitud, titulo);
         } else {
             // Mostrar mapa por defecto de San Luis
+            obtenerMapa();
+        }
+    }
+    
+    /**
+     * @deprecated Usar procesarArgumentosDesdeBundle(Bundle) en su lugar
+     */
+    @Deprecated
+    public void procesarArgumentos(double latitud, double longitud, String titulo) {
+        if (latitud != 0 && longitud != 0) {
+            obtenerMapaInmueble(latitud, longitud, titulo);
+        } else {
             obtenerMapa();
         }
     }

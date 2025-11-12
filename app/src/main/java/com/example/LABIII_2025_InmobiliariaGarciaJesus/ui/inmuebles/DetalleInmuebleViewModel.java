@@ -49,6 +49,12 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
     private MutableLiveData<Boolean> mSwitchEnabled;
     private MutableLiveData<Integer> mCantidadIndicadores;
     private MutableLiveData<Integer> mIndicadorActivo;
+    private MutableLiveData<Boolean> mBotonMapaEnabled;
+    private MutableLiveData<Double> mLatitud;
+    private MutableLiveData<Double> mLongitud;
+    private MutableLiveData<String> mTituloMapa;
+    
+    private int inmuebleIdActual = 0;
 
     public DetalleInmuebleViewModel(@NonNull Application application) {
         super(application);
@@ -204,6 +210,34 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         return mIndicadorActivo;
     }
     
+    public LiveData<Boolean> getMBotonMapaEnabled() {
+        if (mBotonMapaEnabled == null) {
+            mBotonMapaEnabled = new MutableLiveData<>(false);
+        }
+        return mBotonMapaEnabled;
+    }
+    
+    public LiveData<Double> getMLatitud() {
+        if (mLatitud == null) {
+            mLatitud = new MutableLiveData<>(0.0);
+        }
+        return mLatitud;
+    }
+    
+    public LiveData<Double> getMLongitud() {
+        if (mLongitud == null) {
+            mLongitud = new MutableLiveData<>(0.0);
+        }
+        return mLongitud;
+    }
+    
+    public LiveData<String> getMTituloMapa() {
+        if (mTituloMapa == null) {
+            mTituloMapa = new MutableLiveData<>("");
+        }
+        return mTituloMapa;
+    }
+    
     /**
      * Actualiza la posición activa del indicador del carrusel
      */
@@ -212,6 +246,7 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
     }
 
     public void cargarInmueble(int inmuebleId) {
+        this.inmuebleIdActual = inmuebleId; // Guardar para uso posterior
         String token = ApiClient.getToken(context);
 
         if (token == null || token.isEmpty()) {
@@ -246,6 +281,15 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         });
     }
 
+    /**
+     * Maneja el cambio del switch de estado desde la UI
+     * Convierte el boolean a texto "Activo"/"Inactivo"
+     */
+    public void onSwitchEstadoChanged(boolean isChecked) {
+        String estadoTexto = isChecked ? "Activo" : "Inactivo";
+        cambiarEstadoInmueble(inmuebleIdActual, estadoTexto, false);
+    }
+    
     public void cambiarEstadoInmueble(int inmuebleId, String estado, boolean esActualizacionProgramatica) {
         // Lógica: si es actualización programática, salir temprano
         Log.d("DETALLE_INMUEBLE", esActualizacionProgramatica ? "Cambio programático ignorado" : "Cambio por usuario detectado");
@@ -381,5 +425,19 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         
         mSwitchChecked.postValue(esActivo);
         mSwitchEnabled.postValue(puedeModificar);
+        
+        // Preparar datos para el mapa con validación
+        boolean hasCoordinates = inmueble.getLatitud() != null && inmueble.getLongitud() != null;
+        mBotonMapaEnabled.postValue(hasCoordinates);
+        
+        if (hasCoordinates) {
+            mLatitud.postValue(inmueble.getLatitud());
+            mLongitud.postValue(inmueble.getLongitud());
+            mTituloMapa.postValue(inmueble.getDireccion());
+        } else {
+            mLatitud.postValue(0.0);
+            mLongitud.postValue(0.0);
+            mTituloMapa.postValue("");
+        }
     }
 }
