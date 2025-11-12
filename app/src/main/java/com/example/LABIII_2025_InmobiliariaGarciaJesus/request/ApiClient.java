@@ -2,11 +2,6 @@ package com.example.LABIII_2025_InmobiliariaGarciaJesus.request;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.*;
@@ -18,7 +13,6 @@ import java.util.List;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -39,30 +33,16 @@ import retrofit2.http.Path;
 
 public class ApiClient {
 
-    // Configuración de IPs por red WiFi
-    /* private static final String IP_POCO = "http://192.168.248.156:5000/";
-    private static final String IP_TENDA = "http://10.226.44.156:5000/";
-    private static final String IP_EMULADOR = "http://10.0.2.2:5000/";
-    */
-    private static final String IP_DEFAULT = "https://g3kgc7hj-5000.brs.devtunnels.ms/"; // DevTunnel HTTPS
+    private static final String BASE_URL = "https://g3kgc7hj-5000.brs.devtunnels.ms/";
 
     private static MyApiInterface myApiInterface;
     private static String accessToken = null;
-
-    /**
-     * Retorna la URL base configurada (DevTunnel)
-     */
-    private static String getBaseUrlByNetwork(Context context) {
-        Log.d("API_CLIENT", "Usando URL: " + IP_DEFAULT);
-        return IP_DEFAULT;
-    }
 
     /**
      * Obtiene la interfaz API configurada con DevTunnel
      * @param context Context de la aplicación
      */
     public static MyApiInterface getMyApiInterface(Context context){
-        String baseUrl = getBaseUrlByNetwork(context);
         
         // Configurar logging interceptor para debug
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> 
@@ -87,30 +67,10 @@ public class ApiClient {
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl)
+                .baseUrl(BASE_URL)
                 .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
-        Log.d("API_CLIENT", "Base URL configurada: " + retrofit.baseUrl().toString());
-        myApiInterface = retrofit.create(MyApiInterface.class);
-        return myApiInterface;
-    }
-
-    /**
-     * Versión legacy para compatibilidad (sin context)
-     * Usa IP por defecto
-     */
-    public static MyApiInterface getMyApiInterface(){
-        Gson gson = new GsonBuilder()
-                .setLenient()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(IP_DEFAULT)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-        Log.d("API_CLIENT", "Base URL (default): " + retrofit.baseUrl().toString());
         myApiInterface = retrofit.create(MyApiInterface.class);
         return myApiInterface;
     }
@@ -168,17 +128,9 @@ public class ApiClient {
 
     /**
      * Obtiene la URL base configurada (DevTunnel)
-     * @param context Context de la aplicación
      */
     public static String getBaseUrl(Context context){
-        return getBaseUrlByNetwork(context);
-    }
-
-    /**
-     * Obtiene la URL base configurada (DevTunnel) - versión sin context
-     */
-    public static String getBaseUrl(){
-        return IP_DEFAULT;
+        return BASE_URL;
     }
 
     public interface MyApiInterface{

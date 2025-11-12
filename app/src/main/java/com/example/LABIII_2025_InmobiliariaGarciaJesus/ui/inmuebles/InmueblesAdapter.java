@@ -28,13 +28,7 @@ public class InmueblesAdapter extends RecyclerView.Adapter<InmueblesAdapter.View
     private Context context;
     private OnInmuebleClickListener listener;
     private OnEstadoChangeListener estadoListener;
-    
-    /**
-     * Formatea un número con formato argentino:
-     * - Separador de miles: punto (.)
-     * - Separador de decimales: coma (,)
-     * Ejemplo: 100000.50 -> "100.000,50"
-     */
+
     private static String formatearNumeroArgentino(double numero) {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("es", "AR"));
         symbols.setGroupingSeparator('.');

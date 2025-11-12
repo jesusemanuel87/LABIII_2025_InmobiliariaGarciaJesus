@@ -44,8 +44,7 @@ public class InmueblesFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_inmuebles, container, false);
         
         mv = new ViewModelProvider(this).get(InmueblesViewModel.class);
-        
-        // Inicializar vistas
+
         recyclerView = root.findViewById(R.id.recyclerViewInmuebles);
         progressBar = root.findViewById(R.id.progressBarInmuebles);
         tvMensaje = root.findViewById(R.id.tvMensajeInmuebles);
