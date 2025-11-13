@@ -100,12 +100,10 @@ public class PerfilViewModel extends AndroidViewModel {
         String token = ApiClient.getToken(context);
 
         if (token == null || token.isEmpty()) {
-            mError.postValue("No hay sesión activa");
             mCargando.postValue(false);
             Log.d("PERFIL", "No hay token guardado");
             return;
         }
-
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
         Call<Propietario> call = api.obtenerPerfil(token);
 
@@ -116,13 +114,11 @@ public class PerfilViewModel extends AndroidViewModel {
                 mCargando.postValue(false);
                 if (response.isSuccessful() && response.body() != null) {
                     Propietario propietario = response.body();
-                    Log.d("PERFIL", "Datos cargados (REST): " + propietario.toString());
                     mPropietario.postValue(propietario);
-                    // Guardar en SharedPreferences para uso offline
-                    ApiClient.guardarPropietario(context, propietario);
+                    Log.d("PERFIL", "Perfil cargado: " + propietario.getNombre());
                 } else {
                     Log.d("PERFIL", "Error HTTP: " + response.code());
-                    mError.postValue("Error al cargar el perfil: " + response.code());
+                    mError.postValue("Error al cargar perfil: " + response.code());
                 }
             }
 

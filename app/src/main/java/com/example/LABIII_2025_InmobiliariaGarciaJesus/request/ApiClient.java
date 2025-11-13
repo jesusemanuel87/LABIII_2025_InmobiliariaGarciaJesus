@@ -50,7 +50,7 @@ public class ApiClient {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> 
             Log.d("API_HTTP", message)
         );
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY); // Ver body completo para debug
         
         // Crear OkHttpClient con interceptor
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -63,6 +63,7 @@ public class ApiClient {
                 })
                 .build();
         
+        // Configurar Gson simple sin deserializadores custom
         Gson gson = new GsonBuilder()
                 .setLenient()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")

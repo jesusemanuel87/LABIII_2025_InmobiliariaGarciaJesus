@@ -117,17 +117,16 @@ public class InmueblesViewModel extends AndroidViewModel {
                                  @NonNull Response<Inmueble> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Log.d("INMUEBLES", "Estado actualizado correctamente");
-                    mError.postValue("Estado del inmueble actualizado a " + estado);
-                    // Recargar la lista completa
-                    cargarInmuebles();
+                    cargarInmuebles(); // Recargar la lista
                 } else {
                     Log.d("INMUEBLES", "Error HTTP: " + response.code());
-                    mError.postValue("Error al actualizar el estado: " + response.code());
+                    mError.postValue("Error al actualizar estado: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<Inmueble> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<Inmueble> call, 
+                                @NonNull Throwable t) {
                 Log.d("INMUEBLES", "Error de conexión: " + t.getMessage());
                 mError.postValue("Error de conexión: " + t.getMessage());
             }
