@@ -58,6 +58,31 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
     public DetalleInmuebleViewModel(@NonNull Application application) {
         super(application);
         this.context = application.getApplicationContext();
+        // Inicializar LiveData para evitar NPE al usar prepararDatos()
+        mInmueble = new MutableLiveData<>();
+        mError = new MutableLiveData<>();
+        mActualizando = new MutableLiveData<>(false);
+
+        mImagenes = new MutableLiveData<>();
+        mIndicadoresVisibility = new MutableLiveData<>(View.GONE);
+        mDireccion = new MutableLiveData<>();
+        mLocalidad = new MutableLiveData<>();
+        mTipo = new MutableLiveData<>();
+        mAmbientes = new MutableLiveData<>();
+        mSuperficie = new MutableLiveData<>();
+        mUso = new MutableLiveData<>();
+        mPrecio = new MutableLiveData<>();
+        mDisponibilidad = new MutableLiveData<>();
+        mDisponibilidadColor = new MutableLiveData<>();
+        mEstado = new MutableLiveData<>();
+        mSwitchChecked = new MutableLiveData<>(false);
+        mSwitchEnabled = new MutableLiveData<>(true);
+        mCantidadIndicadores = new MutableLiveData<>(0);
+        mIndicadorActivo = new MutableLiveData<>(0);
+        mBotonMapaEnabled = new MutableLiveData<>(false);
+        mLatitud = new MutableLiveData<>(0.0);
+        mLongitud = new MutableLiveData<>(0.0);
+        mTituloMapa = new MutableLiveData<>("");
     }
     
     

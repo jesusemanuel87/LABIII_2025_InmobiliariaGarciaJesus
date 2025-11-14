@@ -25,45 +25,114 @@ Este documento describe el circuito desde que el propietario entra a la sección
 6. Si ya está en modo edición, `onBotonEditarClick` llama `guardarCambios(...)`. Este método valida campos, construye `ActualizarPerfilRequest` y llama `api.actualizarPerfil(token, request)`. En `onResponse` exitoso, hace `mPropietario.postValue(propietarioActualizado)`, cambia `mModoEdicion` a `false`, resetea `mTextoBoton` y `mIconoBoton`, y guarda nuevo propietario en `SharedPreferences`.
 7. Para cambiar contraseña: `PerfilFragment` abre `CambiarPasswordDialog`. El diálogo valida inputs y llama `ApiClient.getMyApiInterface(requireContext()).cambiarPassword(token, currentPassword, newPassword)`. Según la respuesta muestra Toasts apropiados y cierra el diálogo en caso de éxito.
 
-## Flujo detallado (paso a paso)
-### Ver perfil
-- Usuario navega a la sección Perfil.
-- `PerfilFragment.onCreateView()`:
-  - `mv = new ViewModelProvider(this).get(PerfilViewModel.class);`
-  - Observadores se registran (mPropietario, mError, etc.).
-  - Llama `mv.cargarPerfil()`.
-- `PerfilViewModel.cargarPerfil()`:
-  - Lee token: `String token = ApiClient.getToken(context)`.
-  - Llama `api.obtenerPerfil(token)` (Retrofit enqueue).
-  - En `onResponse` exitoso: `mPropietario.postValue(response.body())` y `ApiClient.guardarPropietario(context, propietario)`.
-  - En error: `mError.postValue("Error al cargar el perfil: " + response.code())`.
-- `PerfilFragment` recibe `onChanged(Propietario)` y rellena vistas (nombre, email, dni, teléfono).
+## Flujo completo paso a paso
 
-### Editar perfil
-- Usuario pulsa el botón Editar en `PerfilFragment`.
-- `PerfilFragment` lee los campos y llama `mv.onBotonEditarClick(nombre, apellido, email, telefono)`.
-- `PerfilViewModel.onBotonEditarClick`:
-  - Si `mModoEdicion` es `false`: activa modo edición con `mModoEdicion.postValue(true)` y cambia texto/icono/fondo.
-  - Si `mModoEdicion` es `true`: llama `guardarCambios(...)`.
-- `PerfilViewModel.guardarCambios(...)`:
-  - Valida campos (nombre y apellido obligatorios).
-  - Lee token y propietario actual (`mPropietario.getValue()`), crea `ActualizarPerfilRequest` y llama `api.actualizarPerfil(token, request)`.
-  - En `onResponse` exitoso: actualiza `mPropietario.postValue(propietarioActualizado)`, guarda en SharedPreferences, desactiva modo edición (`mModoEdicion.postValue(false)`), y muestra mensaje `mError.postValue("Perfil actualizado correctamente")`.
-  - En fallo: `mError.postValue("Error al actualizar el perfil: " + response.code())`.
+### **1. Ver Perfil**
 
-### Cambiar contraseña
-- En `PerfilFragment`, botón `btnCambiarPassword` abre `CambiarPasswordDialog`.
-- `CambiarPasswordDialog` valida:
-  - Campos no vacíos.
-  - Nueva contraseña >= 6 caracteres.
-  - Nueva contraseña y confirmación coinciden.
-- Si válido, obtiene token (`ApiClient.getToken(requireContext())`) y llama `api.cambiarPassword(token, passwordActual, passwordNueva)` (PUT form-url-encoded).
-- Manejo de resultado:
-  - `200 OK` -> Toast "Contraseña cambiada exitosamente" y `dismiss()`.
-  - `400` -> Toast "Contraseña actual incorrecta".
-  - `401` -> Toast "Sesión expirada".
-  - `500` -> Toast "Error en el servidor".
-  - En `onFailure` -> Toast de conexión.
+```
+Usuario toca "Perfil" en el NavigationDrawer
+    ↓
+MainActivity navega a PerfilFragment
+    ↓
+PerfilFragment.onCreateView()
+    - Crea PerfilViewModel
+    - Configura observers (mPropietario, mError, mModoEdicion, mTextoBoton, mIconoBoton, etc.)
+    - Llama mv.cargarPerfil()
+    ↓
+PerfilViewModel.cargarPerfil()
+    - Lee token: ApiClient.getToken(context)
+    - Llama api.obtenerPerfil(token)
+    ↓
+Retrofit ejecuta GET /api/PropietariosApi/perfil (o similar)
+    ↓
+Backend responde con Propietario (JSON)
+    ↓
+PerfilViewModel.onResponse()
+    - mPropietario.postValue(propietario)
+    - ApiClient.guardarPropietario(context, propietario) en SharedPreferences
+    - Si error: mError.postValue("Error al cargar el perfil: " + código)
+    ↓
+PerfilFragment (observer de mPropietario)
+    - Rellena vistas con nombre, apellido, email, teléfono, etc.
+```
+
+### **2. Editar Perfil**
+
+```
+Usuario toca botón "Editar" en PerfilFragment
+    ↓
+PerfilFragment.onClickEditar()
+    - Lee textos actuales de los campos
+    - Llama mv.onBotonEditarClick(nombre, apellido, email, telefono)
+    ↓
+PerfilViewModel.onBotonEditarClick(...)
+    - Si mModoEdicion es false:
+        - Activa modo edición:
+            mModoEdicion.postValue(true)
+            mTextoBoton.postValue("Guardar")
+            mIconoBoton.postValue(icono_guardar)
+            mFondoCampos.postValue(fondo_editable)
+        - Opcional: mSolicitarFoco.postValue(true) para enfocar primer campo
+    - Si mModoEdicion es true:
+        - Llama guardarCambios(nombre, apellido, email, telefono)
+    ↓
+PerfilViewModel.guardarCambios(...)
+    - Valida campos (nombre/apellido obligatorios, email válido, etc.)
+    - Si falla validación: mError.postValue("Mensaje de validación") y retorna
+    - Lee token + propietario actual
+    - Crea ActualizarPerfilRequest con los nuevos datos
+    - Llama api.actualizarPerfil(token, request)
+    ↓
+Retrofit ejecuta PUT /api/PropietariosApi/perfil (o similar)
+    ↓
+Backend responde con Propietario actualizado (JSON) o error
+    ↓
+PerfilViewModel.onResponse()
+    - Si éxito:
+        mPropietario.postValue(propietarioActualizado)
+        ApiClient.guardarPropietario(context, propietarioActualizado)
+        mModoEdicion.postValue(false)
+        mTextoBoton.postValue("Editar")
+        mIconoBoton.postValue(icono_editar)
+        mFondoCampos.postValue(fondo_no_editable)
+        mError.postValue("Perfil actualizado correctamente")
+    - Si error:
+        mError.postValue("Error al actualizar el perfil: " + código)
+    ↓
+PerfilFragment (observers)
+    - Actualiza UI según mModoEdicion, mTextoBoton, mIconoBoton, mFondoCampos
+    - Muestra mensajes de mError como Toast o en TextView
+```
+
+### **3. Cambiar Contraseña**
+
+```
+Usuario toca botón "Cambiar contraseña" en PerfilFragment
+    ↓
+PerfilFragment abre CambiarPasswordDialog
+    ↓
+CambiarPasswordDialog
+    - Usuario ingresa contraseña actual, nueva y confirmación
+    - Al tocar "Aceptar", valida:
+        - Campos no vacíos
+        - Nueva contraseña >= 6 caracteres
+        - Nueva contraseña y confirmación coinciden
+    - Si validación falla: muestra Toast y no llama a la API
+    - Si validación pasa:
+        - Lee token: ApiClient.getToken(requireContext())
+        - Llama api.cambiarPassword(token, passwordActual, passwordNueva)
+    ↓
+Retrofit ejecuta PUT /api/PropietariosApi/cambiar-password (form-url-encoded)
+    ↓
+Backend responde con 200/400/401/500, etc.
+    ↓
+CambiarPasswordDialog.onResponse()
+    - 200 → Toast "Contraseña cambiada exitosamente" y dismiss()
+    - 400 → Toast "Contraseña actual incorrecta"
+    - 401 → Toast "Sesión expirada"
+    - 500 → Toast "Error en el servidor"
+    - onFailure → Toast "Error de conexión"
+```
 
 ## LiveData / MutableLiveData implicados
 - `PerfilViewModel`:

@@ -84,6 +84,166 @@ Este documento describe el circuito para crear un nuevo inmueble, editar (vista/
 - Si la creación falla en el servidor, `mMensaje` informa el código de error.
 - En `DetalleInmuebleViewModel`, si la actualización falla, se recarga el inmueble para restaurar el estado anterior.
 
+## Flujo completo paso a paso
+
+### **1. Listar Inmuebles**
+
+```
+Usuario toca "Inmuebles" en el NavigationDrawer
+    ↓
+MainActivity navega a InmueblesFragment
+    ↓
+InmueblesFragment.onCreateView()
+    - Crea InmueblesViewModel
+    - Configura RecyclerView con InmueblesAdapter
+    - Configura observers (mInmuebles, mError, mCargando, etc.)
+    - Llama mv.cargarInmuebles()
+    ↓
+InmueblesViewModel.cargarInmuebles()
+    - mCargando.postValue(true) → Fragment muestra ProgressBar
+    - Lee token: ApiClient.getToken(context)
+    - Llama api.listarInmuebles(token)
+    ↓
+Retrofit ejecuta GET /api/InmueblesApi
+    ↓
+Backend responde con List<Inmueble> (JSON)
+    ↓
+InmueblesViewModel.onResponse()
+    - mCargando.postValue(false) → Fragment oculta ProgressBar
+    - mInmuebles.postValue(inmuebles)
+    ↓
+InmueblesFragment (observer de mInmuebles)
+    - adapter.setInmuebles(items)
+    - Muestra/oculta RecyclerView y mensaje según si hay items
+    ↓
+InmueblesAdapter renderiza cada Inmueble
+    - Muestra imagen (normalizando URL localhost → DevTunnel)
+    - Muestra dirección, tipo, precio, estado / disponibilidad
+    - Muestra switch de estado (si aplica)
+```
+
+### **2. Ver Detalle de Inmueble**
+
+```
+Usuario toca un item en la lista de Inmuebles
+    ↓
+InmueblesAdapter.OnInmuebleClickListener
+    ↓
+InmueblesFragment navega a DetalleInmuebleFragment
+    - Pasa inmuebleId (o el Inmueble serializado) en el Bundle
+    ↓
+DetalleInmuebleFragment.onCreateView()
+    - Crea DetalleInmuebleViewModel
+    - Configura observers para múltiples LiveData (mDireccion, mLocalidad, mTipo, mUso, mPrecio, mEstado, mDisponibilidad, mImagenes, mLatitud, mLongitud, mTituloMapa, etc.)
+    - Lee argumentos del Bundle (id o Inmueble)
+    - Llama mv.cargarInmueble(inmuebleId)
+    ↓
+DetalleInmuebleViewModel.cargarInmueble(inmuebleId)
+    - Lee token: ApiClient.getToken(context)
+    - Llama api.obtenerInmueble(token, inmuebleId)
+    ↓
+Retrofit ejecuta GET /api/InmueblesApi/{id}
+    ↓
+Backend responde con Inmueble (JSON)
+    ↓
+DetalleInmuebleViewModel.onResponse()
+    - mInmueble.postValue(inmueble)
+    - prepararDatos(inmueble)
+    ↓
+DetalleInmuebleViewModel.prepararDatos(inmueble)
+    - Prepara textos: mDireccion, mLocalidad, mTipo, mUso, mPrecio
+    - Prepara disponibilidad/estado y colores (mDisponibilidad, mDisponibilidadColor, mEstado, mSwitchChecked, mSwitchEnabled)
+    - Prepara imágenes para el carrusel: mImagenes, mCantidadIndicadores, mIndicadorActivo
+    - Prepara datos para el mapa: mBotonMapaEnabled, mLatitud, mLongitud, mTituloMapa
+    ↓
+DetalleInmuebleFragment (observers)
+    - Cada observer actualiza su TextView / ImageView / Switch / botón
+    - El Fragment NO formatea datos: solo muestra lo que viene del ViewModel
+```
+
+### **3. Crear nuevo Inmueble**
+
+```
+Usuario está en InmueblesFragment y toca el FAB "Agregar Inmueble"
+    ↓
+Navigation.findNavController().navigate(R.id.cargarInmuebleFragment)
+    ↓
+CargarInmuebleFragment.onCreateView()
+    - Crea CargarInmuebleViewModel
+    - Configura spinners (uso, tipo, provincia, localidad)
+    - Configura listeners (botón guardar, botón obtener ubicación, botón seleccionar foto)
+    - Observa mMensaje, mCargando, mInmuebleCreado
+    - Llama mv.cargarProvincias() y mv.cargarTiposInmueble()
+    ↓
+Usuario completa formulario y selecciona imagen
+    - Imagen se procesa vía mv.procesarImagenDesdeUri(...) → Base64
+    ↓
+Usuario toca "Guardar Inmueble"
+    ↓
+CargarInmuebleFragment.guardarInmueble()
+    - Lee valores de los campos
+    - Llama mv.crearInmueble(... parámetros ...)
+    ↓
+CargarInmuebleViewModel.crearInmueble(...)
+    - Valida campos obligatorios (dirección, ambientes, precio, etc.)
+    - Convierte strings a números (ambientes, superficie, precio, lat/long)
+    - Crea objeto Inmueble y setea todos los campos (incluyendo uso como int, imagenBase64, imagenNombre)
+    - mCargando.postValue(true)
+    - Lee token: ApiClient.getToken(context)
+    - Llama api.crearInmueble(token, inmueble)
+    ↓
+Retrofit ejecuta POST /api/InmueblesApi
+    ↓
+Backend responde con Inmueble creado (JSON) o error
+    ↓
+CargarInmuebleViewModel.onResponse()
+    - mCargando.postValue(false)
+    - Si éxito: mMensaje.postValue("Inmueble creado exitosamente")
+              mInmuebleCreado.postValue(true)
+    - Si error: mMensaje.postValue("Error al crear el inmueble: " + código)
+    ↓
+CargarInmuebleFragment (observer de mInmuebleCreado)
+    - Si true → Navigation.navigateUp() (vuelve a la lista de Inmuebles)
+```
+
+### **4. Cambiar estado (Activo/Inactivo) de un Inmueble**
+
+```
+Usuario abre DetalleInmuebleFragment
+    ↓
+DetalleInmuebleViewModel.cargarInmueble(inmuebleId) → (flujo de detalle, ver arriba)
+    ↓
+UI muestra Switch de estado ligado a mv.getMSwitchChecked()
+    - El ViewModel decide si el switch está habilitado (mSwitchEnabled)
+    ↓
+Usuario cambia el Switch
+    ↓
+Listener en DetalleInmuebleFragment
+    - Llama mv.cambiarEstadoInmueble(inmuebleId, nuevoEstadoTexto, false)
+    ↓
+DetalleInmuebleViewModel.cambiarEstadoInmueble(...)
+    - Verifica token: ApiClient.getToken(context)
+    - Marca mActualizando.postValue(true)
+    - Crea Inmueble con solo el campo estado
+    - Llama api.actualizarEstadoInmueble(token, inmuebleId, inmueble)
+    ↓
+Retrofit ejecuta PATCH /api/InmueblesApi/{id}/estado
+    ↓
+Backend responde con Inmueble actualizado (JSON) o error
+    ↓
+DetalleInmuebleViewModel.onResponse()
+    - mActualizando.postValue(false)
+    - Si éxito:
+        mInmueble.postValue(inmuebleActualizado)
+        prepararDatos(inmuebleActualizado) → refresca todos los LiveData
+    - Si error:
+        mError.postValue("Error al actualizar estado: " + código)
+        (Opcional) recargar inmueble para restaurar estado del switch
+    ↓
+DetalleInmuebleFragment (observers)
+    - Actualiza switch, textos y colores según los nuevos LiveData
+```
+
 ## Recomendaciones / mejoras
 - Añadir endpoint PUT/PATCH para actualizar todos los campos de un inmueble si la API lo soporta; implementar flujo de edición (pre-llenado en `CargarInmuebleFragment`) y `actualizarInmueble(...)` en ViewModel.
 - Usar `DiffUtil` en `InmueblesAdapter` en lugar de `notifyDataSetChanged()` para mejores actualizaciones.
