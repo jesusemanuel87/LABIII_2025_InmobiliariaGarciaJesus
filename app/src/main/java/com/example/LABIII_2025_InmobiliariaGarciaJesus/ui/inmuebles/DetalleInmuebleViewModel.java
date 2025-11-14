@@ -15,7 +15,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ActualizarEstadoInmuebleRequest;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.InmuebleImagen;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
@@ -303,11 +302,13 @@ public class DetalleInmuebleViewModel extends AndroidViewModel {
         Log.d("DETALLE_INMUEBLE", debeEjecutar ? "Inmueble ID: " + inmuebleId : "");
         Log.d("DETALLE_INMUEBLE", debeEjecutar ? "Nuevo estado a enviar: " + estado : "");
         
-        ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(estado);
+        // Crear objeto Inmueble con solo el campo estado
+        Inmueble inmuebleEstado = new Inmueble();
+        inmuebleEstado.setEstado(estado);
         Log.d("DETALLE_INMUEBLE", debeEjecutar ? "Request JSON: {\"estado\":\"" + estado + "\"}" : "");
         
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<Inmueble> call = debeEjecutar ? api.actualizarEstadoInmueble(token, inmuebleId, request) : null;
+        Call<Inmueble> call = debeEjecutar ? api.actualizarEstadoInmueble(token, inmuebleId, inmuebleEstado) : null;
         
         Callback<Inmueble> callback = new Callback<Inmueble>() {
             @Override

@@ -39,7 +39,7 @@ public class Contrato implements Serializable {
     private Double importeAdeudado;
     
     @SerializedName("inmueble")
-    private InmuebleContrato inmueble;
+    private Inmueble inmueble;
     
     @SerializedName("inquilino")
     private InquilinoContrato inquilino;
@@ -138,11 +138,11 @@ public class Contrato implements Serializable {
         this.importeAdeudado = importeAdeudado;
     }
 
-    public InmuebleContrato getInmueble() {
+    public Inmueble getInmueble() {
         return inmueble;
     }
 
-    public void setInmueble(InmuebleContrato inmueble) {
+    public void setInmueble(Inmueble inmueble) {
         this.inmueble = inmueble;
     }
 

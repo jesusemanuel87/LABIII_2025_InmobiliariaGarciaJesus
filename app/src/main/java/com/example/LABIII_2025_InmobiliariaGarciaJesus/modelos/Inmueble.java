@@ -48,7 +48,7 @@ public class Inmueble implements Serializable {
     private String estado;
     
     @SerializedName("uso")
-    private String uso;
+    private Object uso; // Puede ser int (al crear) o String (al recibir del servidor)
     
     @SerializedName("fechaCreacion")
     private String fechaCreacion;
@@ -58,6 +58,12 @@ public class Inmueble implements Serializable {
     
     @SerializedName("imagenes")
     private List<InmuebleImagen> imagenes;
+    
+    @SerializedName("imagenBase64")
+    private String imagenBase64;
+    
+    @SerializedName("imagenNombre")
+    private String imagenNombre;
 
     public Inmueble() {
     }
@@ -175,10 +181,14 @@ public class Inmueble implements Serializable {
     }
 
     public String getUso() {
-        return uso;
+        return uso != null ? uso.toString() : null;
     }
 
     public void setUso(String uso) {
+        this.uso = uso;
+    }
+    
+    public void setUso(int uso) {
         this.uso = uso;
     }
 
@@ -204,6 +214,22 @@ public class Inmueble implements Serializable {
 
     public void setImagenes(List<InmuebleImagen> imagenes) {
         this.imagenes = imagenes;
+    }
+
+    public String getImagenBase64() {
+        return imagenBase64;
+    }
+
+    public void setImagenBase64(String imagenBase64) {
+        this.imagenBase64 = imagenBase64;
+    }
+
+    public String getImagenNombre() {
+        return imagenNombre;
+    }
+
+    public void setImagenNombre(String imagenNombre) {
+        this.imagenNombre = imagenNombre;
     }
 
     @Override

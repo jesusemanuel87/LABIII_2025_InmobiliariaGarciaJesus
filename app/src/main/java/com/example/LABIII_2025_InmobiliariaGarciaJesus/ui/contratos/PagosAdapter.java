@@ -13,7 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.R;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Pago;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class PagosAdapter extends RecyclerView.Adapter<PagosAdapter.ViewHolder> {
     
@@ -65,7 +69,7 @@ public class PagosAdapter extends RecyclerView.Adapter<PagosAdapter.ViewHolder> 
 
         public void bind(Pago pago) {
             tvNumeroPago.setText("Pago #" + pago.getNumero());
-            tvFechaPago.setText("Fecha: " + (pago.getFechaPago() != null ? pago.getFechaPago() : "No especificado"));
+            tvFechaPago.setText("Fecha: " + formatearFecha(pago.getFechaPago()));
             tvImporte.setText(String.format("$ %.2f", pago.getImporte()));
             
             if (pago.getEstado() != null && !pago.getEstado().isEmpty()) {
@@ -94,6 +98,38 @@ public class PagosAdapter extends RecyclerView.Adapter<PagosAdapter.ViewHolder> 
                 // Restaurar colores por defecto si no hay estado
                 tvImporte.setTextColor(Color.parseColor("#2196F3"));
                 itemView.setBackgroundColor(Color.WHITE);
+            }
+        }
+        
+        private String formatearFecha(String fechaISO) {
+            if (fechaISO == null || fechaISO.isEmpty()) {
+                return "No especificado";
+            }
+            
+            try {
+                // Formato de entrada ISO 8601
+                SimpleDateFormat formatoEntrada = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+                // Formato de salida: día/mes/año
+                SimpleDateFormat formatoSalida = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                
+                Date fecha = formatoEntrada.parse(fechaISO);
+                return formatoSalida.format(fecha);
+            } catch (ParseException e) {
+                // Si falla el parseo, intentar extraer solo la fecha
+                if (fechaISO.contains("T")) {
+                    String[] partes = fechaISO.split("T");
+                    if (partes.length > 0) {
+                        try {
+                            SimpleDateFormat formatoEntrada = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                            SimpleDateFormat formatoSalida = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                            Date fecha = formatoEntrada.parse(partes[0]);
+                            return formatoSalida.format(fecha);
+                        } catch (ParseException ex) {
+                            return partes[0]; // Devolver al menos la parte de fecha
+                        }
+                    }
+                }
+                return fechaISO; // Si todo falla, devolver la fecha original
             }
         }
     }

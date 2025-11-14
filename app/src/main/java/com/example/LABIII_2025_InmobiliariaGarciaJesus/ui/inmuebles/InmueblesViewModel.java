@@ -9,7 +9,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.ActualizarEstadoInmuebleRequest;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.request.ApiClient;
 
@@ -107,9 +106,12 @@ public class InmueblesViewModel extends AndroidViewModel {
 
         Log.d("INMUEBLES", "Cambiar estado inmueble " + inmuebleId + " a: " + estado);
         
-        ActualizarEstadoInmuebleRequest request = new ActualizarEstadoInmuebleRequest(estado);
+        // Crear objeto Inmueble con solo el campo estado
+        Inmueble inmueble = new Inmueble();
+        inmueble.setEstado(estado);
+        
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<Inmueble> call = api.actualizarEstadoInmueble(token, inmuebleId, request);
+        Call<Inmueble> call = api.actualizarEstadoInmueble(token, inmuebleId, inmueble);
 
         call.enqueue(new Callback<Inmueble>() {
             @Override

@@ -17,7 +17,6 @@ import androidx.lifecycle.MutableLiveData;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.CrearInmuebleRequest;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Inmueble;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Localidad;
 import com.example.LABIII_2025_InmobiliariaGarciaJesus.modelos.Provincia;
@@ -121,9 +120,6 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
                            longitudStr, imagenBase64, imagenNombre);
     }
     
-    /**
-     * Método interno con la lógica de creación (antes era público)
-     */
     private void crearInmuebleInterno(String direccion, String localidad, String provincia, 
                               int tipoId, String ambientesStr, String superficieStr, int uso, 
                               String precioStr, String latitudStr, String longitudStr,
@@ -222,30 +218,31 @@ public class CargarInmuebleViewModel extends AndroidViewModel {
             return;
         }
 
-        // Crear el request
-        CrearInmuebleRequest request = new CrearInmuebleRequest();
-        request.setDireccion(direccion.trim());
-        request.setLocalidad(localidad.trim());
-        request.setProvincia(provincia.trim());
-        request.setTipoId(tipoId);
-        request.setAmbientes(ambientes);
-        request.setSuperficie(superficie);
-        request.setUso(uso);
-        request.setPrecio(precio);
-        request.setLatitud(latitud);
-        request.setLongitud(longitud);
+        // Crear el inmueble
+        Inmueble inmueble = new Inmueble();
+        inmueble.setDireccion(direccion.trim());
+        inmueble.setLocalidad(localidad.trim());
+        inmueble.setProvincia(provincia.trim());
+        inmueble.setTipoId(tipoId);
+        inmueble.setAmbientes(ambientes);
+        inmueble.setSuperficie(superficie);
+        // Enviar uso como número (0=Residencial, 1=Comercial, 2=Industrial)
+        inmueble.setUso(uso);
+        inmueble.setPrecio(precio);
+        inmueble.setLatitud(latitud);
+        inmueble.setLongitud(longitud);
         
         // Agregar imagen si existe
         if (imagenBase64 != null && !imagenBase64.isEmpty()) {
-            request.setImagenBase64(imagenBase64);
-            request.setImagenNombre(imagenNombre);
+            inmueble.setImagenBase64(imagenBase64);
+            inmueble.setImagenNombre(imagenNombre);
             Log.d("CARGAR_INMUEBLE", "Imagen incluida: " + imagenNombre);
         }
 
         Log.d("CARGAR_INMUEBLE", "Creando inmueble: " + direccion);
 
         ApiClient.MyApiInterface api = ApiClient.getMyApiInterface(context);
-        Call<Inmueble> call = api.crearInmueble(token, request);
+        Call<Inmueble> call = api.crearInmueble(token, inmueble);
 
         call.enqueue(new Callback<Inmueble>() {
             @Override

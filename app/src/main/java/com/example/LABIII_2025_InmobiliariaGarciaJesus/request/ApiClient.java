@@ -173,12 +173,12 @@ public class ApiClient {
 
         @POST("api/InmueblesApi")
         Call<Inmueble> crearInmueble(@Header("Authorization") String token, 
-                                                  @Body CrearInmuebleRequest request);
+                                                  @Body Inmueble inmueble);
 
         @PATCH("api/InmueblesApi/{id}/estado")
         Call<Inmueble> actualizarEstadoInmueble(@Header("Authorization") String token, 
                                                              @Path("id") int inmuebleId, 
-                                                             @Body ActualizarEstadoInmuebleRequest request);
+                                                             @Body Inmueble inmueble);
 
         // === CONTRATOS (ContratosApi) ===
         @GET("api/ContratosApi")
